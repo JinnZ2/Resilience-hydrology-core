@@ -32,3 +32,23 @@ This is OPEN SOURCE research. Use it, modify it, share it.
 ## License
 MIT - do whatever you want with this, just don't blame us if it breaks
 
+Three Use Cases
+1. I Want to Understand the Science
+Start with: simulations/01_basic_dew_simulation.py
+Run time: 30 seconds
+Output: Graph showing how system produces water
+2. I Want to Build Hardware
+Start with: hardware/trailer_dew_collector/
+Cost: $45
+Time: 1 day
+Output: Working dew collector producing 50-100ml/night
+3. I Want to Deploy at Scale
+Start with: simulations/03_seed_optimization.py to find optimal seeds for your climate
+Then: hardware/basic_sensor_node/ to build field nodes
+Cost: $180/node, 100 nodes/hectare
+Current Status
+	•	✅ Physics models validated
+	•	✅ Simulations running
+	•	✅ Prototype hardware tested (northern MN, Nov 2025)
+	•	🚧 Field testing in progress
+	•	🚧 Documentation being improved
