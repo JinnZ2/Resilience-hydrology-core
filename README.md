@@ -52,3 +52,97 @@ Current Status
 	•	✅ Prototype hardware tested (northern MN, Nov 2025)
 	•	🚧 Field testing in progress
 	•	🚧 Documentation being improved
+
+
+---
+
+### `/quick-start.md`
+
+```markdown
+# Quick Start Guide
+
+## For Simulation (No Hardware Needed)
+
+**Time: 5 minutes**
+
+```bash
+# Install dependencies
+pip install numpy matplotlib scipy
+
+# Run basic simulation
+python simulations/01_basic_dew_simulation.py
+
+# You'll see:
+# - Graph of water production over 7 days
+# - Comparison of system ON vs OFF
+# - Total water collected
+
+
+What you’re seeing: Mathematical model showing how the system would perform in your climate.
+For Hardware Build (Beginner Level)
+Time: 4 hours | Cost: $45
+Shopping List
+
+
+1. ESP32 development board ($8)
+2. DS18B20 temperature sensors (2×) ($10)
+3. 5V Peltier cooler ($15)
+4. 18650 battery + holder ($5)
+5. Solar panel (5W) ($7)
+6. Wires, breadboard, container (misc)
+
+
+Buy links: See hardware/trailer_dew_collector/parts_list.csv
+Build Steps
+	1.	Wire the sensors
+
+ESP32 GPIO4 → DS18B20 #1 (ground sensor)
+ESP32 GPIO5 → DS18B20 #2 (air sensor)
+ESP32 3.3V  → Both sensors VCC
+ESP32 GND   → Both sensors GND
+
+
+2.	Flash the firmware
+
+cd firmware/esp32_basic
+# See FLASH_INSTRUCTIONS.md
+
+
+3.	Assemble the collector
+
+from simulations.crop_response import CropResponseSimulator
+
+sim = CropResponseSimulator()
+
+# Run with your climate data
+result = sim.simulate_crop_season(
+    crop_name='wheat',
+    natural_precip=0.034,  # mm/day from system
+    drought_start=30,
+    drought_duration=60
+)
+
+print(f"Yield improvement: {result['yield']:.1%}")
+
+
+See simulations/README.md for full API.
+For Farmers
+Find optimal configuration for your climate
+
+from simulations.seed_optimization import optimize_for_climate
+
+# Your location
+climate_data = {
+    'T_day': 308,    # Kelvin (35°C)
+    'T_night': 288,  # Kelvin (15°C)
+    'RH': 0.25,      # 25% relative humidity
+    'lat': 35.0,     # degrees
+    'lon': -95.0
+}
+
+# Find best seed
+optimal_seed = optimize_for_climate(climate_data)
+print(f"Use seed: {optimal_seed}")
+print(f"Expected water: {optimal_seed['precip_mm_day']:.3f} mm/day")
+
+
