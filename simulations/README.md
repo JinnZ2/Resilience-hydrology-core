@@ -16,3 +16,10 @@ Python models for atmospheric water harvesting.
 
 ```bash
 python 01_basic_dew_simulation.py
+
+
+example output:
+
+System OFF: 0.42 mm total (7 days)
+System ON:  0.65 mm total (7 days)
+Improvement: 55%
