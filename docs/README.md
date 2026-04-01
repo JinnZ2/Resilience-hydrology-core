@@ -1,29 +1,26 @@
-# Resilience Hydrology Documentation
+# Documentation
 
-Human-readable explanations of the atmospheric water harvesting system.
+## Contents
 
-## What is this?
-A way to get water during drought by amplifying natural dew formation.
-
-## How does it work?
-[Someone else writes this in plain English]
+- **[build-guide.md](build-guide.md)** - Hardware builds by budget ($50-$2000)
+- **[trailer-build.md](trailer-build.md)** - Real-world trailer dew collector with results
+- **[atmospheric-seed-theory.md](atmospheric-seed-theory.md)** - Research notes on seed expansion physics
 
 ## Who is this for?
+
 - Farmers facing drought
 - Off-grid residents needing water
-- Disaster relief organizations  
+- Disaster relief organizations
 - Researchers studying water scarcity
 - Makers wanting to build something useful
 
-## Where do I start?
-[Navigation guide to other repos]
-
 ## Contributing
+
 We need:
 - Plain-English explanations of the science
-- Use cases and examples
+- Use cases and field reports
 - Translations to other languages
-- Field reports from testers
 
 ## License
+
 CC-BY-SA 4.0 - share and adapt freely
