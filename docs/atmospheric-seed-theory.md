@@ -2,6 +2,19 @@
 
 Research notes on encoding precipitation patterns in minimal seeds.
 
+> **Status: unimplemented theory.** The physics described here belongs to an
+> ion-coupling PDE model that was never committed to this repository. Only its
+> printed outputs survive, in
+> [`../legacy/2025-original/firmware__02_crop_response.md`](../legacy/2025-original/firmware__02_crop_response.md).
+> The retired "0.034 / 0.14 mm/day" figures came from *this* model, not from the
+> code now in `simulations/` (see [method-log.md](method-log.md) M-01).
+>
+> The 40-bit layout below also does **not** match the layout
+> `simulations/03_seed_optimization.py` actually decodes. Same bit count,
+> different meanings, no stated correspondence (M-08). Note that "wavelength"
+> appears in both meaning different things — a horizontal atmospheric pattern
+> scale here, an optical wavelength in nm there.
+
 ## Core Insight
 
 If we can:

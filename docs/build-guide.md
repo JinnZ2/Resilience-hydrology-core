@@ -16,6 +16,11 @@ that would happen anyway.
 
 Typical output: 50-500ml per night depending on system size and climate.
 
+> The 50-500ml figure is an expectation, not a measurement. The only logged field
+> build ([trailer-build.md](trailer-build.md)) averaged 95ml/night with no
+> control and no recorded collector area. Treat it as a rough hypothesis until
+> someone runs the M-07 protocol.
+
 ## Build Difficulty
 - ⭐ = Hand tools, no electronics knowledge
 - ⭐⭐ = Basic soldering, can follow tutorials
@@ -23,11 +28,16 @@ Typical output: 50-500ml per night depending on system size and climate.
 - ⭐⭐⭐⭐ = Can design and debug systems
 
 ## Climate Zones
-Each build includes seeds optimized for:
+Presets exist for:
 - Arid (hot deserts)
 - Semi-arid (dry grasslands)
 - Mediterranean (dry summers)
 - Tropical dry (monsoon climate)
+
+> **Withdrawn:** builds do *not* ship seeds optimised per climate. The seed
+> optimiser's objective is degenerate — it returns minimum amplification for
+> every climate, and two of its five bytes have no effect on the result at all.
+> See [method-log.md](method-log.md) M-03.
 
 ## Start Building
 Pick your build, get the parts, follow the guide.

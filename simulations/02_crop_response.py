@@ -2,10 +2,25 @@
 """
 Crop response to atmospheric water during drought.
 Shows yield impact for different crops.
+
+Usage:
+    python 02_crop_response.py
+    python 02_crop_response.py --water 0.27 --drought-days 60
+
+The default water input (0.034 mm/day) is inherited from a retired ion-coupling
+model, NOT from 01_basic_dew.py, which produces 0.16-0.30 mm/day. See
+docs/method-log.md (M-01) before treating the default as this system's output.
 """
+
+import argparse
 
 import numpy as np
 import matplotlib.pyplot as plt
+
+# Legacy default. Provenance: legacy/2025-original/firmware__02_crop_response.md
+# ("natural gradient coupling", ~0 kWh/day). Kept as the default so historical
+# runs stay reproducible; override with --water to use the current dew model.
+LEGACY_WATER_MM_DAY = 0.034
 
 class CropWaterModel:
     """Simplified crop water stress model."""
@@ -33,7 +48,7 @@ class CropWaterModel:
         self.crop = crop
         self.params = self.CROPS[crop]
         
-    def simulate_season(self, system_water_mm_day=0.034, drought_days=60):
+    def simulate_season(self, system_water_mm_day=LEGACY_WATER_MM_DAY, drought_days=60):
         """
         Simulate full crop season with drought period.
         
@@ -84,10 +99,13 @@ class CropWaterModel:
             daily_stress.append(stress_fraction)
         
         # Calculate yield reduction
-        # Apply crop-specific tolerance
+        # Apply crop-specific tolerance.
+        # stress is in [0,1], so a LARGER exponent gives a SMALLER reduction --
+        # i.e. exponent must be the tolerance itself, not its reciprocal.
+        # The reciprocal form inverted the ranking (M-04).
         tolerance = self.params['stress_tolerance']
         avg_stress = np.mean(daily_stress)
-        yield_reduction = avg_stress ** (1.0 / tolerance)
+        yield_reduction = avg_stress ** tolerance
         
         final_yield = 1.0 - yield_reduction
         
@@ -98,31 +116,38 @@ class CropWaterModel:
         }
 
 
-def compare_crops():
+def compare_crops(water_mm_day=LEGACY_WATER_MM_DAY, drought_days=60):
     """Compare all crops with/without system."""
     print("="*60)
-    print("Crop Response During 60-Day Drought")
+    print(f"Crop Response During {drought_days}-Day Drought")
+    print(f"System water: {water_mm_day} mm/day")
     print("="*60)
-    
+
     crops = ['wheat', 'olive', 'tomato']
     results = {}
-    
+
     for crop in crops:
         model = CropWaterModel(crop)
-        
+
         # Without system
-        result_off = model.simulate_season(system_water_mm_day=0.0)
-        
-        # With system (0.034 mm/day)
-        result_on = model.simulate_season(system_water_mm_day=0.034)
-        
+        result_off = model.simulate_season(system_water_mm_day=0.0,
+                                           drought_days=drought_days)
+
+        # With system
+        result_on = model.simulate_season(system_water_mm_day=water_mm_day,
+                                          drought_days=drought_days)
+
         results[crop] = {'off': result_off, 'on': result_on}
         
         print(f"\n{crop.upper()}:")
         print(f"  Without system: {result_off['yield']:.1%} yield")
         print(f"  With system:    {result_on['yield']:.1%} yield")
-        improvement = (result_on['yield'] - result_off['yield']) / result_off['yield'] * 100
-        print(f"  Improvement:    +{improvement:.1f}%")
+        if result_off['yield'] > 0:
+            improvement = (result_on['yield'] - result_off['yield']) / result_off['yield'] * 100
+            print(f"  Improvement:    {improvement:+.1f}% relative "
+                  f"({(result_on['yield'] - result_off['yield']) * 100:+.1f} points)")
+        else:
+            print(f"  Improvement:    n/a (baseline yield is zero)")
     
     # Plot
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -137,7 +162,8 @@ def compare_crops():
     ax.bar(x + width/2, yields_on, width, label='System ON', color='blue', alpha=0.8)
     
     ax.set_ylabel('Yield (% of optimal)')
-    ax.set_title('Crop Yield During 60-Day Drought\nWith 0.034 mm/day Atmospheric Water')
+    ax.set_title(f'Crop Yield During {drought_days}-Day Drought\n'
+                 f'With {water_mm_day} mm/day Atmospheric Water')
     ax.set_xticks(x)
     ax.set_xticklabels([c.title() for c in crops])
     ax.legend()
@@ -151,5 +177,16 @@ def compare_crops():
     print("\nGraph saved to: crop_comparison.png")
 
 
+def main():
+    parser = argparse.ArgumentParser(description='Crop response to atmospheric water')
+    parser.add_argument('--water', type=float, default=LEGACY_WATER_MM_DAY,
+                        help='System water input in mm/day (default: %(default)s, '
+                             'the retired ion-coupling figure -- see docs/method-log.md)')
+    parser.add_argument('--drought-days', type=int, default=60)
+    args = parser.parse_args()
+
+    compare_crops(water_mm_day=args.water, drought_days=args.drought_days)
+
+
 if __name__ == '__main__':
-    compare_crops()
+    main()
