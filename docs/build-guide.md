@@ -22,6 +22,23 @@ the $45 trailer build; the rest of that range is an estimate. Whether these
 systems amplify condensation at all is untested — see docs/research-log.md,
 O3.
 
+## Two things every build should get right
+
+Both come out of the variable search (docs/research-log.md, Round 2), and
+neither costs anything:
+
+1. **Tilt the collector, and write down the angle.** Collector tilt is the
+   largest design lever in the model — steeper drains droplets into the
+   collector, but too steep and the surface sees less cold sky. The useful band
+   is roughly 19–53°. No build in this repository currently specifies an angle,
+   which means it is an uncontrolled variable in every result we have.
+2. **Site it under open sky, out of the wind.** Canopy openness and shelter
+   outrank every hardware choice except tilt. A collector under partial canopy
+   loses the cold sky it needs to radiate to.
+
+Adding a humidity sensor is the highest-value upgrade to any build: humidity
+drives whether dew forms at all, and no build here measures it.
+
 ## Build Difficulty
 - ⭐ = Hand tools, no electronics knowledge
 - ⭐⭐ = Basic soldering, can follow tutorials

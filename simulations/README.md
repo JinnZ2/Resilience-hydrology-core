@@ -59,6 +59,10 @@ python 03_seed_optimization.py
 
 **Output**: Seed bytes and parameters for arid, semi-arid, mediterranean, and tropical dry climates.
 
+⚠️ **Superseded for practical purposes by `04_variable_search.py`**, which does
+the same job (search a constrained space) without the degeneracy below, and
+reports ranges rather than points.
+
 ⚠️ **The published seeds are not usable.** The objective is monotonically
 decreasing in amplification, so every climate returns the minimum of the search
 range — "optimal" here means the system turned all the way down. Bytes 3 and 4
@@ -66,3 +70,49 @@ range — "optimal" here means the system turned all the way down. Bytes 3 and 4
 they come back as different random values on every run at an identical score.
 The file is kept as a search scaffold; it needs a defensible cost model before
 its output means anything (research log, H5 and O6).
+
+### 04_variable_search.py
+
+Searches a constrained variable space for the *ranges* that improve yield, and
+ranks variables — including ecological ones — by how much they actually move the
+outcome.
+
+```bash
+python 04_variable_search.py                              # semi-arid, 4000 samples
+python 04_variable_search.py --list-variables              # the constraint table
+python 04_variable_search.py --condensing-only             # isolate design levers
+python 04_variable_search.py --climate arid --samples 12000 --condensing-only
+python 04_variable_search.py --fix tilt_deg=30 --energy-budget 10
+python 04_variable_search.py --climate repo_daytime_rh     # reproduces the H7 null result
+```
+
+**Output**: a five-part report — sensitivity ranking, optimal ranges, interior
+optima, ecological levers, and measurement priorities — plus a PNG.
+
+Unlike the other three files this one uses a surface energy balance (radiative
+loss + active cooling = convective gain + latent release + conduction) rather
+than a linear formula, because the ecological variables need somewhere physical
+to act. Coefficients are tagged `[STANDARD]` or `[ASSUMED]` in the source.
+
+What it reports, and why each part exists:
+
+- **Sensitivity** — first-order index `Var(E[Y|X])/Var(Y)`, which catches
+  variables with a peak in the middle that a correlation coefficient misses.
+- **Optimal ranges** — where the top 10% of outcomes sit, with a `narrow` score
+  saying whether the variable is actually selective.
+- **Corner-solution detection** — flags any "optimum" that is really just a
+  bound. This exists because `03_seed_optimization.py` shipped exactly that
+  failure undetected (research log, H5).
+- **Interior optima** — the variables with a genuine best range. Trust the
+  range; the peak *point* is the noisiest number in the report.
+- **Measurement priorities** — high-leverage variables nobody has measured,
+  which is the actionable form of O1.
+
+Main results so far are in the research log, Round 2. The short version: tilt is
+the biggest design lever and no build guide specifies it; canopy openness and
+upwind soil moisture outrank every hardware variable except tilt; and active
+cooling within the field build's energy budget is worth 1.11x, not 3x.
+
+⚠️ Everything it prints is a property of the model, which has never been
+compared against a field measurement. The rankings are hypotheses about where to
+look, not findings about dew.

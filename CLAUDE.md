@@ -22,6 +22,8 @@ simulations/          Python models (numpy/matplotlib/scipy)
   01_basic_dew.py       Basic dew collection simulation (ON vs OFF comparison)
   02_crop_response.py   Crop yield impact during drought
   03_seed_optimization.py  Optimal 40-bit seed finder using differential evolution
+  04_variable_search.py    Constrained variable search: sensitivity, optimal
+                           ranges, ecological levers, measurement priorities
 firmware/             MicroPython code for ESP32 hardware nodes
   esp32_basic/          Basic temperature logger (DS18B20 sensors)
 docs/                 Documentation, build guides, research notes
@@ -80,6 +82,11 @@ python simulations/03_seed_optimization.py
 - `SeedOptimizer` — Evolutionary seed optimization (simulations/03_seed_optimization.py).
   Known degenerate: the objective always prefers minimum amplification, and 2 of
   its 5 seed bytes are unused. Do not treat its output as usable seeds.
+- `DewEnergyBalance` — Surface energy-balance dew model, the physically
+  structured alternative to `DewSimulator` (simulations/04_variable_search.py)
+- `VariableSearch` — Constrained sampling and sensitivity analysis
+  (simulations/04_variable_search.py). Its `Variable` registry is the single
+  place where variable bounds, kinds, and measurement status are declared.
 - `TemperatureLogger` — ESP32 sensor logger (firmware/esp32_basic/main.py)
 
 ## Hardware

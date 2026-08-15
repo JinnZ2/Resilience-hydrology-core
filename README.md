@@ -53,6 +53,26 @@ build ([docs/trailer-build.md](docs/trailer-build.md)). It cannot yet be
 compared to the table above — collector area was not recorded, so ml/night
 cannot be converted to mm/day per m².
 
+## What actually moves the yield
+
+`simulations/04_variable_search.py` samples a constrained variable space against
+a surface energy-balance model and ranks variables by how much they change the
+outcome. Three results are worth knowing before you build anything:
+
+- **Collector tilt is the largest design lever, and no build guide specifies an
+  angle.** It has a genuine best range (roughly 19–53°) because steeper drains
+  better but sees less cold sky.
+- **Siting beats electronics.** Canopy openness and upwind soil/plant moisture
+  rank above every hardware variable except tilt. Where you put the collector
+  matters more than what you put in it.
+- **Active cooling is nearly inert at the field build's power budget.** A 3 W/m²
+  electrical budget buys about 6% of the radiative cooling the surface already
+  does for free — worth 1.11x, not 3x. Reaching 3x would take roughly 19x the
+  power the $45 build has.
+
+Full numbers and method: [docs/research-log.md](docs/research-log.md), Round 2.
+These are model results, not measurements — see the caveat above.
+
 ## Quick start
 
 ```bash
@@ -62,6 +82,7 @@ python simulations/01_basic_dew.py                        # 7-day dew model, ON 
 python simulations/01_basic_dew.py --climate arid --days 14
 python simulations/02_crop_response.py                    # crop yield during drought
 python simulations/03_seed_optimization.py                # seed search scaffold (see caveat)
+python simulations/04_variable_search.py --condensing-only  # what actually moves yield
 ```
 
 Each writes a PNG to the working directory. See
@@ -100,6 +121,13 @@ measurement: collector area, nightly volume, and logged temperature/humidity.
 That is the missing piece that would let the model be checked against reality
 (research log, O1).
 
+Two cheap additions to any build, ranked by how much they'd change what we know:
+**a humidity sensor** (the current build has none, and humidity is the single
+biggest driver of whether dew forms at all) and **a recorded collector tilt
+angle** (the biggest design lever, currently uncontrolled in every field result
+we have). Run `python simulations/04_variable_search.py --condensing-only` to
+see the full priority list.
+
 ### 3. Deploy at scale
 
 Not yet supported. `03_seed_optimization.py` currently returns a degenerate
@@ -107,6 +135,11 @@ answer — the minimum of its search range for every climate, plus two unused
 random bytes — because its objective always prefers less amplification
 (research log, H5). **Do not deploy seeds it publishes.** The scaffold is kept
 because the search structure is sound; the cost model is what is missing.
+
+For siting and configuration decisions, use
+[`simulations/04_variable_search.py`](simulations/04_variable_search.py)
+instead. It answers the same question without the degeneracy, reports ranges
+rather than points, and flags when an "optimum" is really just a bound.
 
 ## Contributing
 

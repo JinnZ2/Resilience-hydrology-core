@@ -205,6 +205,141 @@ docs asserted. Environment: Python 3, numpy/matplotlib/scipy per
 
 ---
 
+## Round 2 — 2026-08-15: constrained variable search
+
+Round 1 ended with "which variables would most change the answer?" unanswered.
+[`simulations/04_variable_search.py`](../simulations/04_variable_search.py) was
+written to ask it: sample a constrained variable space, evaluate each sample,
+and report the *range* the best outcomes occupy rather than a single optimum —
+with an explicit check for whether that range is really just a bound.
+
+Doing that required a model with somewhere for ecological variables to act.
+`01_basic_dew.py` computes `RH * delta_T * 0.02 * amplification`, so correlating
+anything against it can only rediscover its own two inputs. The new file uses a
+surface energy balance instead (radiative loss + active cooling = convective
+gain + latent release + conduction), solved for surface temperature, with
+condensation from the vapour-pressure gradient. Wind, cloud, canopy openness,
+tilt, emissivity and insulation enter physically.
+
+Both new models remain unvalidated. The energy balance is structurally more
+defensible than the linear formula, which is not the same as being right.
+
+### H7 — dew forms at the climate presets this repository ships
+
+- **Source**: `CLIMATES` in [`01_basic_dew.py`](../simulations/01_basic_dew.py)
+  and [`03_seed_optimization.py`](../simulations/03_seed_optimization.py) —
+  RH 0.25 (arid), 0.35 (semi-arid), 0.45 (mediterranean), 0.40 (tropical dry);
+  first written 2025-12-07.
+- **Prediction**: an energy-balance model run at those humidities produces dew.
+- **Run**: `python simulations/04_variable_search.py --climate repo_daytime_rh --samples 2000`
+- **Result**: **zero condensing samples out of 534 feasible.** Radiative cooling
+  reached 3.2 K below air temperature on average (best case 10.9 K), against a
+  dew-point depression of 12–18 K at those humidities. The surface never reached
+  the dew point, so no water forms at any tilt, emissivity, or insulation.
+- **Verdict**: **FALSIFIED — two distinct defects.**
+  1. **No dew-point check.** `01_basic_dew.py` returns 0.09–0.30 mm/day at these
+     same humidities because its formula multiplies RH by the diurnal
+     temperature range and never asks whether condensation is thermodynamically
+     possible. It reports water forming under conditions where it cannot.
+  2. **Ambiguous humidity.** The presets carry one RH per climate with no time
+     of day attached. Dew is governed by near-surface RH in the hours before
+     dawn, which is far higher than the daytime value at the same site — the air
+     cools toward its dew point overnight while absolute humidity changes
+     little. Whichever was meant, the same number cannot serve both roles.
+- **Revised claim**: the new file documents pre-dawn RH windows separately from
+  the repository's existing presets and states why they differ. The old presets
+  are kept and reachable as `--climate repo_daytime_rh` specifically to
+  reproduce this null result. → **O8**
+
+### H8 — "the system amplifies the natural process 3x"
+
+Round 1 (H2) established the 3x factor is assumed rather than derived. This
+round asks the quantitative follow-up: *could* the field hardware deliver it?
+
+- **Run**: swept active cooling power on a favourable semi-arid night
+  (291 K, RH 0.80, light wind, clear sky, tilt 30°, COP 0.7).
+- **Result**:
+
+  | Cooling delivered (W/m²) | Electrical (W/m²) | Yield (mm) | vs passive |
+  |---|---|---|---|
+  | 0 | 0.0 | 0.115 | 1.00x |
+  | 2 | 2.9 | 0.129 | 1.11x |
+  | 5 | 7.1 | 0.148 | 1.28x |
+  | 20 | 28.6 | 0.246 | 2.13x |
+  | 40 | 57.1 | 0.373 | 3.23x |
+
+  Radiative cooling at equilibrium on that night is **35.3 W/m²**. The trailer
+  build's energy budget — an 18650 cell and a 5 W panel across roughly 0.25 m²
+  of collector, about 3 W/m² electrical over a 12-hour night — buys 2.1 W/m² of
+  cooling at COP 0.7. That is **6% of the radiative term**, worth **1.11x**.
+- **Verdict**: **FALSIFIED at the field hardware's energy budget.** Reaching 3x
+  needs roughly 40 W/m² of cooling, about 57 W/m² electrical — **19x the power
+  the field build has**. The Peltier is not competing with the radiative term;
+  it is a rounding error on it.
+- **Consistent with the search**: across 6,000 samples, `electrical_w_m2` ranked
+  **last** of twelve variables (S1 0.005) and `cop_cooling` second-last (0.007).
+  Within a realistic energy budget, the active-cooling lever is inert.
+- **Revised claim**: "system ON vs OFF" cannot mean Peltier cooling at this power
+  budget. What the passive design does — tilt, siting, surface, insulation — is
+  where the available leverage actually is. → **O11**
+
+### Findings — what the search says to do instead
+
+Not falsifications; model-derived leads. From
+`--climate semi_arid --samples 6000 --condensing-only` (1,072 feasible samples;
+ordering reproduced on `--climate arid`, and identical across repeated runs at
+the default seed):
+
+| Variable | Kind | S1 | Best range | Note |
+|---|---|---|---|---|
+| tilt_deg | design | 0.152 | 19–53° | interior optimum |
+| rh | climate | 0.140 | 0.84–0.89 | at upper bound |
+| local_vapor_boost | siting | 0.086 | 0.08–0.14 | at upper bound |
+| sky_view_factor | siting | 0.078 | 0.69–0.97 | at upper bound |
+| cloud_cover | climate | 0.052 | 0.02–0.35 | at lower bound |
+| wind_speed | climate | 0.023 | 0.8–4.4 m/s | interior optimum |
+| electrical_w_m2 | control | 0.005 | — | no constraint |
+
+1. **Tilt is the largest design lever and no build guide specifies it.** It
+   trades drainage against sky view — steeper sheds droplets into the collector
+   but sees less cold sky — giving a genuine interior optimum rather than a
+   bound. Neither [`build-guide.md`](build-guide.md) nor
+   [`trailer-build.md`](trailer-build.md) mentions collector angle. → **O9**
+2. **The ecological variables are real levers.** Canopy openness
+   (`sky_view_factor`) and upwind soil/plant moisture (`local_vapor_boost`)
+   rank third and fourth, above every hardware variable except tilt. Siting and
+   land management appear to matter more than the electronics.
+3. **Wind is non-monotonic**, as it should be — it feeds vapour to the surface
+   and warms the surface at the same time, so both calm and windy nights
+   underperform. This behaviour was not built in; it emerges from the two
+   channels competing, which is mild evidence the balance model is structured
+   sensibly.
+4. **Humidity dominates whether dew happens at all**, and it is a corner
+   solution: more is always better, all the way to the bound. Only 18% of
+   samples condensed at all. The design variables only matter on nights that
+   condense — which is why the script separates the two questions.
+5. **Three of the top four are pinned at bounds this project invented.** For
+   `local_vapor_boost` the bound is entirely arbitrary — the 0.15 cap was chosen
+   for lack of any measurement. The search says "as much as you'll allow",
+   which is a statement about the box, not the world. → **O10**
+
+### Measurement priorities
+
+The script ranks the variables with high leverage that have never been measured.
+This is the concrete form of O1:
+
+1. **`rh`** (S1 0.140) — the field build has *no humidity sensor at all*, and
+   humidity is the single largest driver of whether dew forms. A DS18B20 pair
+   cannot answer this. Adding one sensor changes more than any other measurement.
+2. **`local_vapor_boost`** (S1 0.086) — an entirely assumed channel with no
+   measurement anywhere.
+3. **`sky_view_factor`** (S1 0.078) — costs one upward photo per site to record.
+4. **`cloud_cover`** (S1 0.052) — recoverable retrospectively from weather
+   records for the November 2025 nights.
+5. **`wind_speed`** (S1 0.023) — non-monotonic, so a value is needed, not a bound.
+
+---
+
 ## Open questions
 
 Carried forward. Each names what would close it.
@@ -248,6 +383,33 @@ Carried forward. Each names what would close it.
   architecture, and deployment protocols; the working tree implements none of it.
   Worth an inventory pass to decide what is a live direction and what is
   abandoned, so the theory doc stops implying capability that no code provides.
+- **O8 — The climate presets need a time of day.** `01_basic_dew.py` and
+  `03_seed_optimization.py` share one RH per climate that is used as if it
+  governed nighttime condensation. Either they are daytime values (in which case
+  the dew calculation is using the wrong number) or pre-dawn values (in which
+  case they are implausibly low for dew formation). Closing this needs a decision
+  on which quantity is meant, pre-dawn values sourced per climate, and a
+  dew-point check added to `01_basic_dew.py` so it stops reporting water under
+  conditions that forbid it. Raised by H7.
+- **O9 — Collector tilt is unspecified everywhere.** It is the largest design
+  lever in the search (S1 0.152) with a real interior optimum near 19–53°, and
+  no build document mentions an angle. Cheap to close: record the angle on the
+  existing trailer collector, and add a specified tilt to the build guide. Until
+  then, tilt is an uncontrolled variable in every field result the project has.
+- **O10 — Assumed coefficients now carry conclusions.** `04_variable_search.py`
+  tags its unjustified numbers `[ASSUMED]`: the convective transfer coefficients
+  (2.5 W/m²K still, 3.0 per m/s), the tilt-to-collection-efficiency shape, and
+  the 0.15 cap on `local_vapor_boost`. Three of the search's top four variables
+  sit at bounds this project invented, so those bounds are shaping the answer.
+  The vapour-boost channel matters most: it is both influential and completely
+  unmeasured.
+- **O11 — Is the real product passive?** H8 shows active cooling is worth 1.11x
+  at the field energy budget and would need ~19x the power for the claimed 3x.
+  Meanwhile tilt, siting, and canopy openness carry the leverage. The honest
+  reframing may be that this is a passive radiative-cooling collector whose
+  performance is set by *where and how you put it*, with the electronics
+  demoted to logging. That is a different project from the one the docs
+  describe, and deciding between them needs O1's field data.
 
 ---
 
