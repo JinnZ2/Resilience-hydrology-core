@@ -290,14 +290,17 @@ Not falsifications; model-derived leads. From
 ordering reproduced on `--climate arid`, and identical across repeated runs at
 the default seed):
 
+*(Regenerated after the Round 3 collection-efficiency correction; see that
+round for what changed and why.)*
+
 | Variable | Kind | S1 | Best range | Note |
 |---|---|---|---|---|
-| tilt_deg | design | 0.152 | 19–53° | interior optimum |
-| rh | climate | 0.140 | 0.84–0.89 | at upper bound |
-| local_vapor_boost | siting | 0.086 | 0.08–0.14 | at upper bound |
-| sky_view_factor | siting | 0.078 | 0.69–0.97 | at upper bound |
-| cloud_cover | climate | 0.052 | 0.02–0.35 | at lower bound |
-| wind_speed | climate | 0.023 | 0.8–4.4 m/s | interior optimum |
+| rh | climate | 0.155 | 0.85–0.89 | at upper bound |
+| tilt_deg | design | 0.098 | 18–53° | interior optimum |
+| local_vapor_boost | siting | 0.092 | 0.08–0.14 | at upper bound |
+| sky_view_factor | siting | 0.084 | 0.69–0.97 | at upper bound |
+| cloud_cover | climate | 0.057 | 0.02–0.35 | at lower bound |
+| wind_speed | climate | 0.024 | 0.8–4.4 m/s | interior optimum |
 | electrical_w_m2 | control | 0.005 | — | no constraint |
 
 1. **Tilt is the largest design lever and no build guide specifies it.** It
@@ -337,6 +340,142 @@ This is the concrete form of O1:
 4. **`cloud_cover`** (S1 0.052) — recoverable retrospectively from weather
    records for the November 2025 nights.
 5. **`wind_speed`** (S1 0.023) — non-monotonic, so a value is needed, not a bound.
+
+---
+
+## Round 3 — 2026-08-15: transition analysis, and the first model-vs-measurement test
+
+Round 2 said what matters. It did not say what to do about the collector already
+sitting in a field, which is a different question — a deployed unit has sunk
+costs, an owner, and a budget.
+[`simulations/05_transition_paths.py`](../simulations/05_transition_paths.py)
+asks it: given the build as deployed and a catalogue of modifications with real
+costs, what is the cheapest ordered set of changes, and which of them survive
+our own uncertainty?
+
+Every modification is scored across a Monte Carlo that varies **both the weather
+and our own [ASSUMED] coefficients**. Ranking by a single predicted yield would
+launder O10's uncertainty into false confidence; what gets reported instead is
+how often a change helped across draws.
+
+### Model correction found while building this
+
+`04_variable_search.py` had collection efficiency as
+`EFF_MAX * (1 - exp(-tilt/TILT_CHAR))`, which is exactly **zero at zero tilt**.
+A flat plate is not a zero-yield object — dew forms on it and some reaches the
+vessel; it just drains badly. The consequence was silent and serious: every
+configuration that had not been angled produced exactly nothing, including the
+deployed build, whose tilt was never recorded. Added `EFF_MIN = 0.15`
+[ASSUMED].
+
+**Round 2 was re-run after the fix and its top two swapped**: humidity moves
+from second to first (S1 0.140 → 0.155) and tilt from first to second
+(0.152 → 0.098). The Round 2 table above carries the corrected figures. Tilt
+remains the largest *design* lever — the variable a builder controls — which is
+what the build guidance rests on, so no recommendation changes. But the earlier
+claim that tilt was the single biggest driver overall was an artifact of the
+zero-at-flat bug inflating the gap between angled and unangled collectors.
+
+### H9 — can the model reproduce the only measurement this project has?
+
+The first time a model output and a field measurement have been put side by
+side. This is what O1 has been asking for, attempted with the data that exists.
+
+- **The measurement**: 85 ml and 110 ml on two nights, northern Minnesota,
+  November 2025 ([`trailer-build.md`](trailer-build.md)).
+- **Run**: `05_transition_paths.py` at `--site field_nov_mn`, 3000 draws.
+- **Result**:
+
+  | Configuration | Model output |
+  |---|---|
+  | Build as assumed deployed (flat, uninsulated, obstructed sky, Peltier on) | mean 0.05 mL/night, best night 4.6 |
+  | Well-configured at the same site (30° tilt, open sky, insulated, frost ignored) | mean 34.7 mL/night, best night 139.5 |
+
+- **Verdict**: **UNDETERMINED — and the reason is missing metadata, not missing
+  physics.** The measurement is three orders of magnitude above the first row
+  and sits comfortably inside the second. Both readings are consistent with the
+  notebook, because **the collector's area and tilt angle were never recorded**.
+  We cannot tell whether the model is wrong or whether the assumed baseline
+  configuration is wrong.
+- **What this costs**: a tape measure and a protractor, applied once in 2025,
+  would have made this a real test. Instead the single most valuable dataset the
+  project owns cannot discriminate between "the physics is wrong" and "the
+  collector was tilted and nobody wrote it down". → **O9, O1**
+- **Note on the null-result direction**: the model does NOT rule out the
+  reported volumes. A best night of 139.5 mL brackets 85 and 110 comfortably. If
+  anything this is weak encouragement for the energy balance — it can produce
+  the observed magnitudes under a plausible configuration, which the linear model
+  in `01_basic_dew.py` was never in a position to demonstrate either way.
+
+### Transition findings
+
+Site `field_nov_mn`, 2000 draws, budget tranches $0 / $10 / $25 / $50 per unit.
+
+**1. The deployment ran in the wrong month.** At that site in November the model
+puts **47% of nights below freezing** and **4% making water**. The same site in
+September: **0% frozen, 16% making water**. The night-4 frost failure in the
+field log is a modelled outcome of the season, not bad luck — and no hardware
+change repairs it. Choosing *when* to run is free and outranks everything that
+can be bolted on.
+
+**2. Ordering dominates the parts list.** Each hardware modification was scored
+alone against the deployed build, and again in sequence after the free
+decisions:
+
+| Modification | Alone | After season + siting fixed |
+|---|---|---|
+| Angle to 30° | +0.1 | **+10.9** mL/night |
+| Wet mulch upwind | +0.4 | **+10.8** mL/night |
+| Foam block under mount | +0.4 | **+2.9** mL/night |
+| Double collector area | +0.1 | **+31.1** mL/night |
+| High-emissivity coating | +0.0 | +2.0 mL/night |
+
+A bracket cannot improve a night that was never going to condense. **A build
+guide that lists these parts without the ordering is selling upgrades that will
+appear not to work** — and would generate exactly the kind of disappointing
+field results that get blamed on the concept rather than the sequence.
+
+**3. The first stage is self-funding.** Removing the Peltier recovers $15, which
+pays for the bracket, the foam, and the mulch with $3 left over. Stage one costs
+**minus three dollars** and takes the modelled output from ~0 to 25 mL/night. No
+funding decision, no procurement, no permission — a screwdriver and a decision
+about where the collector sits.
+
+| Stage | Spend (cumulative) | Modelled yield |
+|---|---|---|
+| Free decisions + self-funded parts | **−$3** | 25.0 mL/night |
+| + high-emissivity coating | $5 | 26.9 |
+| + larger panel | $23 | 31.1 |
+| + double the area | $48 | 62.1 |
+
+**4. Doubling the area is the only lever that never disappoints.** It is
+arithmetic, not physics: it cannot fail to work, and it does not depend on any
+[ASSUMED] coefficient. Everything above it in the list is cheaper per mL but
+rests on the model being roughly right.
+
+**5. One recommendation rests on an invented channel.** The mulch bed scores
++10.8 mL/night in sequence, entirely through `local_vapor_boost` — a mechanism
+this project made up and has never measured (O10). The script flags it in its
+own output rather than presenting it alongside the defensible steps. It is a
+trial to run, not a recommendation to follow.
+
+### Design changes made as a result
+
+The point of the loop is that findings change the artifact. What was altered:
+
+- **[`docs/build-guide.md`](build-guide.md)** rewritten to lead with the two
+  free decisions and to specify a tilt angle; Peltier moved from a component to
+  an explicit "do not fit". Original preserved at
+  [`legacy/docs/build-guide_2025-12-07.md`](../legacy/docs/build-guide_2025-12-07.md).
+- **[`docs/trailer-build.md`](trailer-build.md)** — the "next iteration" list
+  (frost heater, bigger panel) was replaced. Both existed to keep the Peltier
+  running; both are now the wrong spend. Original preserved at
+  [`legacy/docs/trailer-build_2025-12-07.md`](../legacy/docs/trailer-build_2025-12-07.md).
+- **[`firmware/esp32_validation/`](../firmware/esp32_validation/)** — new
+  firmware logging collector surface temperature, humidity, and tipping-bucket
+  volume, with collector area and tilt as mandatory site constants that refuse
+  to pass silently when unset. `esp32_basic` is untouched and still fine for
+  what it does; it simply cannot test anything.
 
 ---
 
@@ -403,6 +542,18 @@ Carried forward. Each names what would close it.
   sit at bounds this project invented, so those bounds are shaping the answer.
   The vapour-boost channel matters most: it is both influential and completely
   unmeasured.
+- **O12 — Seasonal operating window per climate.** Round 3 found that *when* you
+  run dominates what you bolt on, and nothing in this repository states a dew
+  season for any climate. Each preset needs a start and end month, derived from
+  the frost line and pre-dawn humidity, so a builder is not left to discover
+  November the hard way. The September/November windows used in
+  `05_transition_paths.py` are [ASSUMED] and cover one site only.
+- **O13 — Collection efficiency has never been measured.** `EFF_MIN` and
+  `EFF_MAX` (0.15 and 0.95) bracket how much of the dew that forms actually
+  reaches the vessel, and both are invented. Since tilt is the largest design
+  lever and acts entirely through this function, the shape of this curve is
+  carrying more weight than any other assumption here. Measurable directly:
+  weigh a plate before and after a dew night, compare against what drained.
 - **O11 — Is the real product passive?** H8 shows active cooling is worth 1.11x
   at the field energy budget and would need ~19x the power for the claimed 3x.
   Meanwhile tilt, siting, and canopy openness carry the leverage. The honest

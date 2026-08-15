@@ -100,6 +100,29 @@ It also documents structure that was planned but never built (`/theory`,
 `quick-start.md`, `FAQ.md`) — useful as a statement of intent, which is why the
 dead paths were removed from the working README rather than from here.
 
+### `docs/build-guide_2025-12-07.md` — 42 lines
+
+The original build guide, verbatim, as first written on 2025-12-07 (then named
+`BUILD-README.md`).
+
+Archived because the working guide was restructured on 2026-08-15 to lead with
+two free decisions — operating season and siting — rather than with budget
+tiers and hardware. The transition analysis found every hardware step in the
+original to be near-worthless until those decisions are made, and large
+afterwards. The original also lists a Peltier cooler as a component; the current
+guide lists removing it as a saving. See
+[`docs/research-log.md`](../docs/research-log.md), Round 3 and H8.
+
+### `docs/trailer-build_2025-12-07.md` — 33 lines
+
+The original trailer build report, verbatim.
+
+Its "Next iteration" list — add a frost heater, double the solar panel — is
+preserved here because both items were aimed at keeping the Peltier running, and
+the working version now recommends removing it instead. The original also
+carries the "Average: 95ml/night" figure that was later withdrawn to the two
+nights actually recorded (H4, O5).
+
 ### `docs/docs-README_2025-12-07.md` — 29 lines
 
 The original documentation index, verbatim. Superseded by

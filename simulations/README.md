@@ -116,3 +116,38 @@ cooling within the field build's energy budget is worth 1.11x, not 3x.
 ⚠️ Everything it prints is a property of the model, which has never been
 compared against a field measurement. The rankings are hypotheses about where to
 look, not findings about dew.
+
+### 05_transition_paths.py
+
+Takes an already-built collector and returns the cheapest ordered set of changes
+to improve it — with costs, hours, and who has to act.
+
+```bash
+python 05_transition_paths.py                              # the actual deployment site
+python 05_transition_paths.py --list-mods                  # the modification catalogue
+python 05_transition_paths.py --site semi_arid_summer
+python 05_transition_paths.py --budget 0 10 25 50 100
+```
+
+**Output**: no-regret moves, information moves, a staged plan by budget tranche,
+an ordering-effects table, a breakdown by actor, and an explicit "what not to
+do".
+
+Every modification is scored across a Monte Carlo varying **both the weather and
+this project's own `[ASSUMED]` coefficients**, so a recommendation that survives
+is one that does not depend on us being right about the numbers we invented.
+Modifications are re-scored after each step is applied, so interactions are
+handled rather than assumed additive.
+
+Three results worth knowing:
+
+- **The first stage costs −$3.** Removing the Peltier pays for the bracket, the
+  foam, and the mulch.
+- **Ordering beats the parts list.** Angling the collector is worth +0.1 mL/night
+  on its own and +10.9 after the free season and siting decisions. A guide that
+  lists parts without the ordering sells upgrades that appear not to work.
+- **Information outranks hardware.** The entire measurement kit is $23 and about
+  four hours, and it is what makes every other number in this repository
+  checkable.
+
+Details in the research log, Round 3.

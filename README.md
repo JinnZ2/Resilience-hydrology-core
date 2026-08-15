@@ -49,9 +49,10 @@ original wording is preserved in
 [legacy/docs/README_2025-12-07.md](legacy/docs/README_2025-12-07.md).
 
 The one field measurement is 85 ml and 110 ml on two nights from the trailer
-build ([docs/trailer-build.md](docs/trailer-build.md)). It cannot yet be
-compared to the table above — collector area was not recorded, so ml/night
-cannot be converted to mm/day per m².
+build ([docs/trailer-build.md](docs/trailer-build.md)). Comparing it to a model
+has been attempted once (research log, H9) and came out **undetermined** — not
+because the physics failed, but because the collector's area and tilt angle were
+never written down, and the answer depends on both.
 
 ## What actually moves the yield
 
@@ -73,6 +74,26 @@ outcome. Three results are worth knowing before you build anything:
 Full numbers and method: [docs/research-log.md](docs/research-log.md), Round 2.
 These are model results, not measurements — see the caveat above.
 
+## Already built one? Start here
+
+[`simulations/05_transition_paths.py`](simulations/05_transition_paths.py) takes
+an existing collector and returns the cheapest ordered set of changes. Its
+findings changed this project's build guidance:
+
+- **Run it in the dew season.** At the one site this project has deployed to, in
+  the month it deployed, the model puts 47% of nights below freezing and 4%
+  making water. The same site in September: 0% frozen, 16% productive. The frost
+  failure in the field log was the season, not the hardware.
+- **The first stage costs −$3.** Removing the Peltier pays for the bracket, the
+  foam, and the mulch, with change left over. No funding decision required.
+- **Order beats the parts list.** Angling the collector gains +0.1 mL/night on
+  its own and +10.9 once the free season and siting decisions are made. A guide
+  that lists parts without that ordering sells upgrades that appear not to work.
+
+Every recommendation is scored across a Monte Carlo varying both the weather and
+this project's own assumed coefficients, so what survives does not depend on us
+being right about numbers we invented.
+
 ## Quick start
 
 ```bash
@@ -83,6 +104,7 @@ python simulations/01_basic_dew.py --climate arid --days 14
 python simulations/02_crop_response.py                    # crop yield during drought
 python simulations/03_seed_optimization.py                # seed search scaffold (see caveat)
 python simulations/04_variable_search.py --condensing-only  # what actually moves yield
+python simulations/05_transition_paths.py                   # cheapest changes to an existing build
 ```
 
 Each writes a PNG to the working directory. See
@@ -93,6 +115,8 @@ Each writes a PNG to the working directory. See
 ```
 simulations/     Python models (numpy / matplotlib / scipy)
 firmware/        MicroPython for ESP32 sensor nodes
+  esp32_basic/     temperature only
+  esp32_validation/ adds surface temp, humidity, volume - use this one
 docs/            Build guides, theory notes, research log
 legacy/          Superseded originals, archived with dates — never deleted
 ```
@@ -121,12 +145,17 @@ measurement: collector area, nightly volume, and logged temperature/humidity.
 That is the missing piece that would let the model be checked against reality
 (research log, O1).
 
-Two cheap additions to any build, ranked by how much they'd change what we know:
-**a humidity sensor** (the current build has none, and humidity is the single
-biggest driver of whether dew forms at all) and **a recorded collector tilt
-angle** (the biggest design lever, currently uncontrolled in every field result
-we have). Run `python simulations/04_variable_search.py --condensing-only` to
-see the full priority list.
+The whole measurement kit is **$23 and about four hours**:
+[`firmware/esp32_validation/`](firmware/esp32_validation/) logs collector
+surface temperature, humidity, and nightly volume, and takes the collector area
+and tilt angle as constants you write down once.
+
+Those last two matter more than they sound. The trailer build reported 85 ml and
+110 ml, but nobody recorded its area or angle — and the model reproduces those
+volumes under a well-configured collector while producing almost nothing under a
+poorly-configured one. Both are consistent with the notebook. A tape measure and
+a protractor are the difference between a validated model and a stalled
+project (research log, H9).
 
 ### 3. Deploy at scale
 

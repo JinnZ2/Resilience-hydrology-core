@@ -24,8 +24,12 @@ simulations/          Python models (numpy/matplotlib/scipy)
   03_seed_optimization.py  Optimal 40-bit seed finder using differential evolution
   04_variable_search.py    Constrained variable search: sensitivity, optimal
                            ranges, ecological levers, measurement priorities
+  05_transition_paths.py   Cheapest ordered changes from a deployed build to a
+                           better one, scored under our own uncertainty
 firmware/             MicroPython code for ESP32 hardware nodes
   esp32_basic/          Basic temperature logger (DS18B20 sensors)
+  esp32_validation/     Adds surface temp, humidity, and volume - the sensors
+                        needed to test the model against reality
 docs/                 Documentation, build guides, research notes
   research-log.md       Claims tested, falsified, revised; open questions
   build-guide.md        Hardware builds by budget ($50-$2000)
@@ -43,13 +47,14 @@ legacy/               Superseded originals, archived by date — never deleted
 
 - **Simulations**: Python 3, numpy, matplotlib, scipy
 - **Firmware**: MicroPython on ESP32
-- **Sensors**: DS18B20 (temperature), OneWire protocol
+- **Sensors**: DS18B20 (temperature, OneWire), SHT31-D (humidity, I2C),
+  tipping-bucket gauge (interrupt)
 
 ## Conventions
 
 - Python files use snake_case for functions, variables, and file names
 - Classes use PascalCase
-- Simulation files are numbered: `01_`, `02_`, `03_`
+- Simulation files are numbered: `01_` through `05_`
 - Units: mm/day for water output, Kelvin for temperatures in code, Celsius in display
 - Climate presets: arid, semi_arid, mediterranean, tropical_dry
 
@@ -73,7 +78,13 @@ pip install -r requirements.txt
 python simulations/01_basic_dew.py
 python simulations/02_crop_response.py
 python simulations/03_seed_optimization.py
+python simulations/04_variable_search.py --condensing-only
+python simulations/05_transition_paths.py
 ```
+
+Numbered filenames start with a digit, so they cannot be imported normally.
+`05_transition_paths.py` loads `04_variable_search.py` via importlib; follow
+that pattern if another file needs to reuse a model.
 
 ## Key Classes
 
@@ -87,12 +98,23 @@ python simulations/03_seed_optimization.py
 - `VariableSearch` — Constrained sampling and sensitivity analysis
   (simulations/04_variable_search.py). Its `Variable` registry is the single
   place where variable bounds, kinds, and measurement status are declared.
+- `TransitionEvaluator` / `Modification` — Retrofit scoring under weather and
+  coefficient uncertainty (simulations/05_transition_paths.py)
 - `TemperatureLogger` — ESP32 sensor logger (firmware/esp32_basic/main.py)
+- `ValidationLogger` — Surface temp + humidity + volume logger
+  (firmware/esp32_validation/main.py)
 
 ## Hardware
 
-- ESP32 dev board + 2x DS18B20 sensors + Peltier cooler
+- ESP32 dev board + DS18B20 sensors; add SHT31 and a tipping-bucket gauge for
+  the validation node
 - Total cost: $45-180 depending on build
+- **The Peltier cooler is no longer recommended.** At the energy budget these
+  builds have it delivers ~6% of the radiative cooling the surface already does
+  for free, worth about 1.11x against a claimed 3x (`docs/research-log.md`, H8).
+  Removing it recovers $15 and funds the changes that do work.
+- Build order matters more than the parts: season, then siting, then tilt. Each
+  hardware change is near-worthless before those and large after them (Round 3)
 - Field tested: northern Minnesota, November 2025 — one site, 2 nights recorded
   (85 ml, 110 ml). Collector area was not measured, so these cannot yet be
   converted to mm/day and compared against the models. Closing that gap is the

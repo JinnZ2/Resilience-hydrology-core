@@ -90,9 +90,17 @@ T_FREEZE = 273.15        # K
 H_C_STILL = 2.5          # W/(m^2 K)
 H_C_WIND = 3.0           # W/(m^2 K) per m/s
 
-# Droplet collection efficiency vs tilt: eff = EFF_MAX * (1 - exp(-tilt/TILT_CHAR))
-# Shape (steeper drains better, with diminishing returns) is physically sensible;
-# both numbers are [ASSUMED].
+# Droplet collection efficiency vs tilt:
+#   eff = EFF_MIN + (EFF_MAX - EFF_MIN) * (1 - exp(-tilt/TILT_CHAR))
+# Shape (steeper drains better, with diminishing returns) is physically
+# sensible; all three numbers are [ASSUMED].
+#
+# EFF_MIN exists because a flat plate is not a zero-yield object: dew forms on
+# it and some reaches the vessel, it just drains badly. An earlier version
+# omitted this and made tilt=0 collect exactly nothing, which silently zeroed
+# every configuration that had not been angled — including the deployed build,
+# whose tilt was never recorded. See docs/research-log.md, Round 3.
+EFF_MIN = 0.15
 EFF_MAX = 0.95
 TILT_CHAR = 18.0         # degrees
 
@@ -280,8 +288,21 @@ class DewEnergyBalance:
     Solved for surface temperature, which then sets the condensation rate.
     """
 
-    def __init__(self, **v):
+    # The [ASSUMED] coefficients, overridable per instance so that callers can
+    # test how much a conclusion depends on them. 05_transition_paths.py samples
+    # these to check whether a recommendation survives our own uncertainty —
+    # see docs/research-log.md, O10.
+    DEFAULT_COEFFS = {
+        'h_c_still': H_C_STILL,
+        'h_c_wind': H_C_WIND,
+        'eff_min': EFF_MIN,
+        'eff_max': EFF_MAX,
+        'tilt_char': TILT_CHAR,
+    }
+
+    def __init__(self, coeffs=None, **v):
         self.v = v
+        self.c = dict(self.DEFAULT_COEFFS, **(coeffs or {}))
 
     def _p_cool(self):
         """Heat removal actually delivered, W/m^2, from power spent and COP."""
@@ -339,7 +360,7 @@ class DewEnergyBalance:
         """
         v = self.v
         t_air = v['t_air_night']
-        h_c = H_C_STILL + H_C_WIND * v['wind_speed']
+        h_c = self.c['h_c_still'] + self.c['h_c_wind'] * v['wind_speed']
         e_air = self._air_vapor_pressure()
         sky_fraction = self._view_factors()
 
@@ -360,7 +381,9 @@ class DewEnergyBalance:
         m_dot = self._mass_flux(t_surface, h_c, e_air)
         seconds = v['night_hours'] * 3600.0
 
-        tilt_eff = EFF_MAX * (1.0 - math.exp(-v['tilt_deg'] / TILT_CHAR))
+        tilt_eff = self.c['eff_min'] + (
+            self.c['eff_max'] - self.c['eff_min']) * (
+            1.0 - math.exp(-v['tilt_deg'] / self.c['tilt_char']))
         formed_mm = m_dot * seconds
         frozen = t_surface < T_FREEZE
 

@@ -2,48 +2,112 @@
 
 Practical, buildable water harvesting systems for drought conditions.
 
-## I Need Water Right Now
+> **Revised 2026-08-15.** This guide used to lead with hardware and budget
+> tiers. It now leads with two free decisions, because the transition analysis
+> found that every hardware upgrade in it is close to worthless until those two
+> decisions are made — and large afterwards. The original guide is preserved at
+> [`legacy/docs/build-guide_2025-12-07.md`](../legacy/docs/build-guide_2025-12-07.md);
+> what changed and why is in [`research-log.md`](research-log.md), Round 3.
 
-Only one of these builds is written up. The rest are planned, not available.
+## Build in this order
 
-1. **Budget < $50**: [trailer-build.md](trailer-build.md) — written up, built,
-   partially measured
-2. **Budget < $200**: Basic Field Node — *planned, not written*
-3. **Budget < $2000**: Complete Field System — *planned, not written*
-4. **I'm a farmer**: Farm-Scale Deployment — *planned, not written*
+The order is the finding. Steps 1 and 2 cost nothing and unlock everything after
+them. In the model, a collector angled to 30° gains **+0.1 mL/night** on its own
+and **+10.9 mL/night** once steps 1 and 2 are done. A bracket cannot improve a
+night that was never going to condense.
 
-## What These Do
-These systems don't create rain. They amplify natural condensation (dew/fog) 
-that would happen anyway.
+### 1. Run it in the dew season — free
 
-Claimed output: 50-500ml per night depending on system size and climate. The
-only measured figures in this repository are 85 ml and 110 ml on two nights from
-the $45 trailer build; the rest of that range is an estimate. Whether these
-systems amplify condensation at all is untested — see docs/research-log.md,
-O3.
+A site that freezes on half its nights is not a dew site on those nights, and no
+hardware fixes that. The one field deployment this project has ran in northern
+Minnesota in **November**, where the model puts **47% of nights below freezing**
+and only **4% making water**. The same site in **September**: 0% frozen, 16%
+making water.
 
-## Two things every build should get right
+Frost is not a malfunction to be engineered around. It is a signal that you are
+running in the wrong month.
 
-Both come out of the variable search (docs/research-log.md, Round 2), and
-neither costs anything:
+### 2. Put it under open sky, out of the wind — free
 
-1. **Tilt the collector, and write down the angle.** Collector tilt is the
-   largest design lever in the model — steeper drains droplets into the
-   collector, but too steep and the surface sees less cold sky. The useful band
-   is roughly 19–53°. No build in this repository currently specifies an angle,
-   which means it is an uncontrolled variable in every result we have.
-2. **Site it under open sky, out of the wind.** Canopy openness and shelter
-   outrank every hardware choice except tilt. A collector under partial canopy
-   loses the cold sky it needs to radiate to.
+Canopy openness ranks above every hardware variable except tilt. A collector
+tucked beside a trailer or under a tree loses the cold sky it must radiate to —
+that sky is the entire cooling mechanism.
 
-Adding a humidity sensor is the highest-value upgrade to any build: humidity
-drives whether dew forms at all, and no build here measures it.
+Wind both feeds vapour to the surface and warms it, so there is a middle band
+rather than "less is better". A light breeze is fine; exposed and gusty is not.
+
+### 3. Angle the collector to about 30° — $3
+
+The largest design lever in the model, with a genuine best range of roughly
+**19–53°**. Steeper drains droplets into the vessel; too steep and the surface
+sees less cold sky. A scrap bracket does it.
+
+**Write the angle down.** It has never been recorded on any build, which is why
+the one field measurement cannot be checked against any model (see
+"Why this matters" below).
+
+### 4. Insulate the mount — $4
+
+A foam block between collector and support stops the mount conducting heat back
+into the surface you are trying to keep cold. This also addresses the night-4
+frost failure in the trailer log.
+
+### 5. Do not fit a Peltier cooler — saves $15
+
+At the energy budget these builds actually have — roughly 3 W/m² electrical from
+a small panel and one 18650 across a long night — active cooling delivers about
+**6% of the radiative cooling the surface already does for free**. It is worth
+about **1.11x**, and reaching the 3x this project used to claim would need
+roughly **19x the power available**.
+
+If your build already has one, removing it recovers the part cost and pays for
+steps 3 and 4 with change left over. See [`research-log.md`](research-log.md),
+H8.
+
+## Budget tiers
+
+| Budget | What you get |
+|---|---|
+| **$0** | Steps 1–2, plus step 5 if you already own a Peltier (this tier *pays you*) |
+| **< $15** | Steps 1–5 complete: season, siting, tilt, insulation, no Peltier |
+| **< $40** | Add the measurement kit below — the highest-value spend in the project |
+| **< $75** | Double the collector area. Area is the only lever that scales linearly and never disappoints |
+
+Only the first tier is fully written up, as
+[trailer-build.md](trailer-build.md). Field Node, Complete Field System, and
+Farm-Scale Deployment are *planned, not written*.
+
+## The measurement kit — $23
+
+Nothing here produces water. It is still the best money in this guide, because
+without it no claim the project makes can be checked.
+
+| Item | Cost | Closes |
+|---|---|---|
+| Tape measure on the collector, write down the area | free | half of O1 |
+| Protractor on the bracket, write down the tilt | free | O9 |
+| Third DS18B20 bonded to the collector plate | $5 | tests the physics directly |
+| SHT31 humidity sensor | $6 | the biggest driver, currently unmeasured |
+| Tipping-bucket gauge and counter | $12 | turns anecdotes into a series |
+
+Firmware for the last three is in
+[`firmware/esp32_validation/`](../firmware/esp32_validation/).
+
+**Why this matters.** The trailer build reported 85 ml and 110 ml on two nights.
+Nobody recorded the collector's area or angle. Run the model on a *poorly*
+configured collector at that site and you get 0.05 mL/night; run it on a
+*well* configured one and you get a mean of 35 with a best night of 140 — which
+brackets the measurement neatly. So we cannot tell whether the model is wrong or
+the assumed configuration is wrong. Two numbers nobody wrote down are the
+difference between a validated model and a stalled project.
 
 ## Build Difficulty
 - ⭐ = Hand tools, no electronics knowledge
 - ⭐⭐ = Basic soldering, can follow tutorials
 - ⭐⭐⭐ = Comfortable with Arduino/code
 - ⭐⭐⭐⭐ = Can design and debug systems
+
+Steps 1–5 are all ⭐. The measurement kit is ⭐⭐.
 
 ## Climate Zones
 The simulations carry presets for:
@@ -52,14 +116,23 @@ The simulations carry presets for:
 - Mediterranean (dry summers)
 - Tropical dry (monsoon climate)
 
-Note: builds do **not** currently ship optimized seeds. The seed optimizer
-returns a degenerate answer for every climate and its output should not be
-deployed — see docs/research-log.md, H5.
+Note: builds do **not** ship optimized seeds. The seed optimizer returns a
+degenerate answer for every climate and its output should not be deployed — see
+[`research-log.md`](research-log.md), H5. For siting and configuration
+decisions use `simulations/04_variable_search.py` and
+`simulations/05_transition_paths.py` instead.
+
+## Already built one?
+
+`python simulations/05_transition_paths.py` takes an existing unit and returns
+the cheapest ordered set of changes, with costs, hours, and who has to act. Its
+first stage costs **negative three dollars**.
 
 ## Start Building
 Pick your build, get the parts, follow the guide.
 
-Post your results (success or failure) so others can learn.
+Post your results — success or failure, and *with the area and angle recorded* —
+so others can learn.
 
 ## Safety
 This amplifies natural processes. It's not weather modification.
