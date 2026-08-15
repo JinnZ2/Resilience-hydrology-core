@@ -1,7 +1,26 @@
 #!/usr/bin/env python3
 """
-Optimize 40-bit seed for local climate conditions.
+Search for a 40-bit seed suited to local climate conditions.
 Uses scipy differential evolution algorithm.
+
+KNOWN DEGENERATE — do not deploy the seeds this prints.
+
+The objective in evaluate_seed() decreases monotonically in amplification: the
+precipitation gain per unit is at most 0.020 under any climate preset here,
+against an energy penalty of 0.05 and a further 0.05 safety penalty on the
+largest amplification. So the optimum is always the corner at minimum
+amplification, and every climate returns [0, 0, 0, ...] — "optimal" meaning the
+system turned all the way down.
+
+Bytes 3 and 4 (wavelength, crop_bias) are decoded but never read by
+evaluate_seed, so they are unconstrained: repeated runs return different values
+for them at an identical score.
+
+This file is kept as a search scaffold. The weights were deliberately NOT
+retuned to produce an interior optimum — that would manufacture the desired
+answer. Fixing it needs a defensible cost model expressing amplification gain
+and energy cost in comparable units, plus a decision on whether bytes 3-4 get a
+role or leave the seed format. See docs/research-log.md, H5 and O6.
 """
 
 import numpy as np
@@ -91,6 +110,11 @@ def main():
     print("=" * 60)
     print("Seed Optimization for Different Climates")
     print("=" * 60)
+    print()
+    print("WARNING: this objective is known to be degenerate. It always")
+    print("prefers minimum amplification, so every climate returns a corner")
+    print("solution, and seed bytes 3-4 are unused and therefore random.")
+    print("Do not deploy these seeds. See docs/research-log.md, H5.")
     print()
 
     for climate_name in CLIMATES:

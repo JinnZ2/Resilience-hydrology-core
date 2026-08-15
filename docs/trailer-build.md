@@ -15,14 +15,25 @@ I live in a trailer and needed drinking water without infrastructure.
 
 Total: $45
 
-## Results (7 days, Nov 2025, northern MN)
+## Results (Nov 2025, northern MN)
 - Night 1: 85ml
 - Night 2: 110ml
-- [data...]
-Average: 95ml/night
+- Nights 3-7: not recorded
+
+**Recorded: 2 nights, 85 and 110 ml.** An earlier version of this page reported
+"Average: 95ml/night" over 7 days. Only two nights are written down, and the
+failure notes below (frost on night 4, dead battery on day 6) imply fewer than
+seven usable nights, so the average is withdrawn until the missing nights turn
+up. See docs/research-log.md, O5.
+
+**Not recorded, and needed**: collector surface area. Without it these volumes
+cannot be converted to mm/day per m², which is the unit the simulations output —
+so this dataset cannot currently be compared to any model in the repository.
+Anyone repeating this build: measure the area (research log, O1).
 
 ## Code
-See /resilience-hydrology-core/firmware/esp32/trailer-basic/
+See [firmware/esp32_basic/](../firmware/esp32_basic/) — `main.py` logs the
+ground/air temperature gradient. There is no separate trailer-specific firmware.
 
 ## Failures
 - Condensation froze on night 4 (need insulation)

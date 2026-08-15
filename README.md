@@ -1,148 +1,129 @@
-# Resilience Hydrology System
+# Resilience Hydrology Core
 
 Physics-based water harvesting using natural atmospheric gradients.
 
-## The Problem
-During drought, conventional irrigation fails. Wells go dry, rivers stop flowing, 
-water becomes scarce. People and crops suffer.
+## The problem
 
-## This Approach
-Instead of pumping or transporting water, we amplify the natural process of dew 
+During drought, conventional irrigation fails. Wells go dry, rivers stop
+flowing, water becomes scarce. People and crops suffer.
+
+## This approach
+
+Instead of pumping or transporting water, amplify the natural process of dew
 formation using temperature, pH, and light gradients that exist everywhere.
+No pumps, no wells, no infrastructure.
 
-Output: 0.034-0.14 mm/day depending on conditions and energy available.
+## Status — read this before citing any number
 
-## How It Works
-( read repo files )
+This is open research in progress, and the honest summary is short:
 
-## Status
-Working prototypes in testing. Code is functional. Hardware is proven.
+- ✅ Simulations run and are internally consistent
+- ✅ Prototype hardware built and logging (northern Minnesota, Nov 2025)
+- ⚠️ **Models are not validated against field data.** No comparison between
+  modelled and measured output has been performed in this repository.
+- ⚠️ **The 3x amplification factor is an assumption, not a measurement.** It is
+  hard-coded into the simulation, so the ON/OFF comparison illustrates that
+  assumption rather than testing it.
+- 🚧 Field testing in progress — one site, partial data
 
-This is OPEN SOURCE research. Use it, modify it, share it.
+Every claim below is either a model output with the command that reproduces it,
+or it is marked untested. What has been checked, what was falsified, and what
+was revised as a result is recorded in
+**[docs/research-log.md](docs/research-log.md)**.
 
-## Quick Start
-- **Researchers**: See /theory for equations and models
-- **Builders**: See /hardware for schematics and BOM
-- **Coders**: See /firmware for ESP32/Arduino code
-- **Users**: See [drought-survival-builds repo] for complete build guides
+## What the model produces
 
-## Contributing
-[Link to CONTRIBUTING.md]
+Running `simulations/01_basic_dew.py` across the four climate presets:
 
-## License
-MIT - do whatever you want with this, just don't blame us if it breaks
+| Climate | System OFF | System ON |
+|---|---|---|
+| arid | 0.100 mm/day | 0.300 mm/day |
+| semi_arid | 0.091 mm/day | 0.273 mm/day |
+| mediterranean | 0.054 mm/day | 0.162 mm/day |
+| tropical_dry | 0.080 mm/day | 0.240 mm/day |
 
-Three Use Cases
-1. I Want to Understand the Science
-Start with: simulations/01_basic_dew_simulation.py
-Run time: 30 seconds
-Output: Graph showing how system produces water
-2. I Want to Build Hardware
-Start with: hardware/trailer_dew_collector/
-Cost: $45
-Time: 1 day
-Output: Working dew collector producing 50-100ml/night
-3. I Want to Deploy at Scale
-Start with: simulations/03_seed_optimization.py to find optimal seeds for your climate
-Then: hardware/basic_sensor_node/ to build field nodes
-Cost: $180/node, 100 nodes/hectare
-Current Status
-	•	✅ Physics models validated
-	•	✅ Simulations running
-	•	✅ Prototype hardware tested (northern MN, Nov 2025)
-	•	🚧 Field testing in progress
-	•	🚧 Documentation being improved
+**These are model outputs, not measurements**, and the ON column inherits the
+assumed 3x factor. An earlier headline figure of "0.034–0.14 mm/day" was
+withdrawn — it is not reproducible from any code here (research log, H1). The
+original wording is preserved in
+[legacy/docs/README_2025-12-07.md](legacy/docs/README_2025-12-07.md).
 
+The one field measurement is 85 ml and 110 ml on two nights from the trailer
+build ([docs/trailer-build.md](docs/trailer-build.md)). It cannot yet be
+compared to the table above — collector area was not recorded, so ml/night
+cannot be converted to mm/day per m².
 
----
-
-### `/quick-start.md`
-
-```markdown
-# Quick Start Guide
-
-## For Simulation (No Hardware Needed)
-
-**Time: 5 minutes**
+## Quick start
 
 ```bash
-# Install dependencies
-pip install numpy matplotlib scipy
+pip install -r requirements.txt
 
-# Run basic simulation
-python simulations/01_basic_dew_simulation.py
+python simulations/01_basic_dew.py                        # 7-day dew model, ON vs OFF
+python simulations/01_basic_dew.py --climate arid --days 14
+python simulations/02_crop_response.py                    # crop yield during drought
+python simulations/03_seed_optimization.py                # seed search scaffold (see caveat)
+```
 
-# You'll see:
-# - Graph of water production over 7 days
-# - Comparison of system ON vs OFF
-# - Total water collected
+Each writes a PNG to the working directory. See
+[simulations/README.md](simulations/README.md) for details.
 
+## Repository structure
 
-What you’re seeing: Mathematical model showing how the system would perform in your climate.
-For Hardware Build (Beginner Level)
-Time: 4 hours | Cost: $45
-Shopping List
+```
+simulations/     Python models (numpy / matplotlib / scipy)
+firmware/        MicroPython for ESP32 sensor nodes
+docs/            Build guides, theory notes, research log
+legacy/          Superseded originals, archived with dates — never deleted
+```
 
+## Three ways in
 
-1. ESP32 development board ($8)
-2. DS18B20 temperature sensors (2×) ($10)
-3. 5V Peltier cooler ($15)
-4. 18650 battery + holder ($5)
-5. Solar panel (5W) ($7)
-6. Wires, breadboard, container (misc)
+### 1. Understand the science
 
+Start with [`simulations/01_basic_dew.py`](simulations/01_basic_dew.py) (runs in
+seconds), then read [docs/research-log.md](docs/research-log.md) to see which of
+its assumptions survive scrutiny and which do not. The theory behind the seed
+approach is in
+[docs/atmospheric-seed-theory.md](docs/atmospheric-seed-theory.md), condensed
+from the full 2025-12-07 research session in
+[legacy/notes/](legacy/notes/2025-12-07_seed-expansion-session.md).
 
-Buy links: See hardware/trailer_dew_collector/parts_list.csv
-Build Steps
-	1.	Wire the sensors
+### 2. Build hardware
 
-ESP32 GPIO4 → DS18B20 #1 (ground sensor)
-ESP32 GPIO5 → DS18B20 #2 (air sensor)
-ESP32 3.3V  → Both sensors VCC
-ESP32 GND   → Both sensors GND
+[docs/build-guide.md](docs/build-guide.md) covers builds by budget.
+[docs/trailer-build.md](docs/trailer-build.md) is a real $45 build with its
+results *and its failures* — frost on night 4, dead battery on day 6. Firmware
+and flashing steps are in [firmware/](firmware/README.md).
 
+The most useful thing a builder can contribute right now is a paired
+measurement: collector area, nightly volume, and logged temperature/humidity.
+That is the missing piece that would let the model be checked against reality
+(research log, O1).
 
-2.	Flash the firmware
+### 3. Deploy at scale
 
-cd firmware/esp32_basic
-# See FLASH_INSTRUCTIONS.md
+Not yet supported. `03_seed_optimization.py` currently returns a degenerate
+answer — the minimum of its search range for every climate, plus two unused
+random bytes — because its objective always prefers less amplification
+(research log, H5). **Do not deploy seeds it publishes.** The scaffold is kept
+because the search structure is sound; the cost model is what is missing.
 
+## Contributing
 
-3.	Assemble the collector
+Most valuable, in order:
 
-from simulations.crop_response import CropResponseSimulator
+1. **Field measurements** that can be compared to the model (see O1 in the
+   research log)
+2. **Falsifications** — run something here, show it does not do what it claims,
+   open an issue with the numbers
+3. Plain-English explanations, use cases, translations
 
-sim = CropResponseSimulator()
+If you revise a claim, follow the convention this repository runs on: state the
+new claim with its evidence, and archive the old wording in `legacy/` rather
+than overwriting it. Precedence stays with whoever wrote it first —
+see [legacy/README.md](legacy/README.md).
 
-# Run with your climate data
-result = sim.simulate_crop_season(
-    crop_name='wheat',
-    natural_precip=0.034,  # mm/day from system
-    drought_start=30,
-    drought_duration=60
-)
+## License
 
-print(f"Yield improvement: {result['yield']:.1%}")
-
-
-See simulations/README.md for full API.
-For Farmers
-Find optimal configuration for your climate
-
-from simulations.seed_optimization import optimize_for_climate
-
-# Your location
-climate_data = {
-    'T_day': 308,    # Kelvin (35°C)
-    'T_night': 288,  # Kelvin (15°C)
-    'RH': 0.25,      # 25% relative humidity
-    'lat': 35.0,     # degrees
-    'lon': -95.0
-}
-
-# Find best seed
-optimal_seed = optimize_for_climate(climate_data)
-print(f"Use seed: {optimal_seed}")
-print(f"Expected water: {optimal_seed['precip_mm_day']:.3f} mm/day")
-
-
+MIT — do whatever you want with this, just don't blame us if it breaks.
+Documentation under CC-BY-SA 4.0.

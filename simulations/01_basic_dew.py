@@ -29,8 +29,13 @@ class DewSimulator:
 
     Physics:
     - Temperature inversion at night drives condensation
-    - System amplifies natural process 2-4x
     - Energy input: zero (natural mode) or <1W (boosted)
+
+    ASSUMPTION, not a result: the system amplifies the natural process by a
+    hard-coded factor of 3.0 (see simulate_night). That factor is an input, so
+    the ON vs OFF comparison illustrates the assumption rather than testing it,
+    and every climate reports exactly +200%. Nothing in this repository derives
+    or measures it. See docs/research-log.md, H2 and O3.
     """
 
     def __init__(self, T_day=305, T_night=288, RH=0.30):
@@ -50,6 +55,7 @@ class DewSimulator:
         delta_T = self.T_day - self.T_night
         natural_dew = self.RH * delta_T * 0.02  # mm/night
 
+        # Assumed, not derived — see class docstring and research log H2.
         amplification = 3.0 if system_on else 1.0
         return natural_dew * amplification
 

@@ -2,6 +2,11 @@
 """
 Crop response to atmospheric water during drought.
 Shows yield impact for different crops.
+
+Scale note: crop demand here is 1.5-4.5 mm/day, while the default system input
+is 0.034 mm/day — about 1% of demand. The modelled yield effect at that rate is
+under one percentage point; 2-3 mm/day is where it starts to matter. See
+docs/research-log.md, H3.
 """
 
 import numpy as np
@@ -84,10 +89,14 @@ class CropWaterModel:
             daily_stress.append(stress_fraction)
         
         # Calculate yield reduction
-        # Apply crop-specific tolerance
+        # Apply crop-specific tolerance.
+        # avg_stress is in [0, 1], so a LARGER exponent means a SMALLER
+        # reduction: tolerant crops (high stress_tolerance) lose less yield
+        # at the same stress. See docs/research-log.md, H6 — this was
+        # inverted (1.0 / tolerance) until 2026-08-15.
         tolerance = self.params['stress_tolerance']
         avg_stress = np.mean(daily_stress)
-        yield_reduction = avg_stress ** (1.0 / tolerance)
+        yield_reduction = avg_stress ** tolerance
         
         final_yield = 1.0 - yield_reduction
         

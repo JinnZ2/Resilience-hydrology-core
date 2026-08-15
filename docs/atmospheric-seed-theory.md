@@ -2,6 +2,15 @@
 
 Research notes on encoding precipitation patterns in minimal seeds.
 
+> **Status: theory, untested.** Nothing on this page has been implemented or
+> measured. It is condensed from the original research session of 2025-12-07,
+> archived in full at
+> [`legacy/notes/2025-12-07_seed-expansion-session.md`](../legacy/notes/2025-12-07_seed-expansion-session.md)
+> — 4,404 lines, of which this page keeps a small fraction. **Priority for this
+> material dates to that file.** Read it rather than this page if you intend to
+> build on the ideas; most of them (adaptive strategies, layered altitude
+> sensing, network architecture, deployment protocols) exist only there.
+
 ## Core Insight
 
 If we can:
@@ -44,6 +53,12 @@ Control variable: Ion production rate S_ion(z, t)
 [24-31]: Temporal modulation pattern
 [32-39]: Energy budget allocation
 ```
+
+⚠️ This layout does **not** match what
+[`simulations/03_seed_optimization.py`](../simulations/03_seed_optimization.py)
+actually decodes (`amp_T`, `amp_pH`, `amp_light`, `wavelength`, `crop_bias`).
+Two independent seed formats share one name. Resolving which is authoritative is
+an open item — see docs/research-log.md, O6.
 
 Physics expands this to:
 
