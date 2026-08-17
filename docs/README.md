@@ -21,7 +21,8 @@ routes — a natural replication, and worth keeping as one. `method-log.md` came
 first and holds precedence; `research-log.md` continues past it into rounds 2-3.
 Where they overlap, the M-entry is the original record. See
 [log-format-comparison.md](log-format-comparison.md) for what each format is
-good at, tested rather than argued.
+good at, tested rather than argued — `python tools/log_audit.py` reruns that
+test.
 
 Superseded documents live frozen in [`../legacy/`](../legacy/README.md), which is
 where the method log's provenance trails lead.

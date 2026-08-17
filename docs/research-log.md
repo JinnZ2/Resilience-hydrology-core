@@ -134,6 +134,9 @@ docs asserted. Environment: Python 3, numpy/matplotlib/scipy per
 ### H4 — "Physics models validated", "Hardware is proven"
 
 - **Source**: root README status list, 2025-12-07.
+- **Prediction**: if the models are "validated" and the hardware "proven", the
+  repository contains at least one comparison of a model output against a
+  measurement, with the conditions of that measurement recorded.
 - **Run**: searched the repository for any comparison of model output against
   measurement.
 - **Result**: none exists. The only field data in the repository is
@@ -261,8 +264,12 @@ defensible than the linear formula, which is not the same as being right.
 Round 1 (H2) established the 3x factor is assumed rather than derived. This
 round asks the quantitative follow-up: *could* the field hardware deliver it?
 
+- **Prediction**: if 3x is achievable, the field build's energy budget buys
+  enough cooling to triple the passive yield on a favourable night.
 - **Run**: swept active cooling power on a favourable semi-arid night
-  (291 K, RH 0.80, light wind, clear sky, tilt 30°, COP 0.7).
+  (291 K, RH 0.80, light wind, clear sky, tilt 30°, COP 0.7), via
+  `python simulations/05_transition_paths.py --site semi_arid_summer`
+  and direct evaluation of `DewEnergyBalance` across `electrical_w_m2`.
 - **Result**:
 
   | Cooling delivered (W/m²) | Electrical (W/m²) | Yield (mm) | vs passive |
@@ -388,7 +395,10 @@ side. This is what O1 has been asking for, attempted with the data that exists.
 
 - **The measurement**: 85 ml and 110 ml on two nights, northern Minnesota,
   November 2025 ([`trailer-build.md`](trailer-build.md)).
-- **Run**: `05_transition_paths.py` at `--site field_nov_mn`, 3000 draws.
+- **Prediction**: if the energy-balance model describes this collector, its
+  output for that site and month brackets the two recorded volumes.
+- **Run**: `python simulations/05_transition_paths.py --site field_nov_mn --samples 3000`,
+  plus direct evaluation of a best-case configuration at the same site.
 - **Result**:
 
   | Configuration | Model output |
@@ -484,6 +494,62 @@ The point of the loop is that findings change the artifact. What was altered:
 
 ---
 
+## Round 4 — 2026-08-16: the logs themselves, tested
+
+The merge with `main` brought in a second falsification record,
+[`method-log.md`](method-log.md), written independently by a parallel session
+that reached the same round-1 findings by different routes. The question was
+which to keep. Rather than argue it, both were audited with
+[`../tools/log_audit.py`](../tools/log_audit.py) — the same standard these logs
+impose on the models.
+
+### H10 — "this log does what it claims to do"
+
+- **Source**: the rules at the top of this file, and the equivalent at the top
+  of `method-log.md`.
+- **Prediction**: every entry cites a command a reader can run, carries the
+  fields its own format requires, and resolves from any code that cites it.
+- **Run**: `python tools/log_audit.py --verify-commands`
+- **Result** (before corrections):
+
+  | | method-log | research-log |
+  |---|---|---|
+  | entries citing a runnable command | 2/8 | 5/9 |
+  | entries missing a required field | 0/8 | **2/9** |
+  | cited commands that execute | 2/2 | 4/4 |
+
+- **Verdict**: **FALSIFIED for this log, on completeness.** H4 and H8 were
+  missing the Prediction field this format requires — written by the same
+  session that wrote the rule. `method-log.md` passed its own field check 8/8
+  with nobody checking. Corrected: H4, H8 and H9 now carry predictions and
+  literal commands, taking this log to 7/9 runnable and 0 incomplete.
+- **The measured difference between the formats**: `method-log` is more
+  disciplined (per-claim ledger, fixed status vocabulary, IDs cited in code
+  comments); this log is more reproducible (explicit `Run:` line that wants a
+  command, not a description). Full comparison in
+  [`log-format-comparison.md`](log-format-comparison.md).
+- **Decision**: keep both. Where the two overlap — H1/M-01, H2/M-02, H5/M-03,
+  H6/M-04 — they were derived independently and agree. **That is a replication,
+  and it is the strongest evidence in this repository**; everything else here is
+  one model run once. Deleting either log to tidy up would destroy it.
+
+### The audit was wrong twice before it was right
+
+Recorded because it is the failure mode this log exists to catch, occurring in
+the instrument built to check the log.
+
+Run 1 reported method-log citing almost no commands — the extractor matched only
+inline backticks, and that log uses fenced bash blocks. Run 2 reported one of its
+commands as failing — the extractor had split a `for` loop into lines and run a
+fragment with an unbound variable. Both errors made the other session's work look
+worse than it is. Neither was caught by the audit; both were caught by checking a
+surprising result against the source.
+
+**An automated check is a claim like any other.** A green audit is evidence about
+the audit as much as about the thing audited. → **O14**
+
+---
+
 ## Open questions
 
 Carried forward. Each names what would close it.
@@ -560,6 +626,13 @@ Carried forward. Each names what would close it.
   lever and acts entirely through this function, the shape of this curve is
   carrying more weight than any other assumption here. Measurable directly:
   weigh a plate before and after a dew night, compare against what drained.
+- **O14 — The audit only checks form, not truth.** `tools/log_audit.py` verifies
+  that an entry cites a command and that the command exits zero. It does not
+  check that the command produces the numbers the entry claims. An entry could
+  cite a working command and report fabricated results and still pass. Closing
+  this means capturing expected output per entry and diffing it on rerun —
+  which would also catch entries whose numbers silently went stale when the code
+  changed, the way Round 2's figures did after the Round 3 fix.
 - **O11 — Is the real product passive?** H8 shows active cooling is worth 1.11x
   at the field energy budget and would need ~19x the power for the claimed 3x.
   Meanwhile tilt, siting, and canopy openness carry the leverage. The honest

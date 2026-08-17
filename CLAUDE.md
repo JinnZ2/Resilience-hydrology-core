@@ -34,6 +34,10 @@ docs/                 Documentation, build guides, research notes
   build-guide.md        Hardware builds by budget ($50-$2000)
   trailer-build.md      Real-world trailer dew collector results
   atmospheric-seed-theory.md  Research notes on seed expansion physics
+tools/                Repository self-checks
+  log_audit.py          Audits both falsification logs: does every claim cite a
+                        runnable command, carry its required fields, and resolve
+                        from the code that cites it?
 legacy/               Superseded files, frozen — the precedence record
   README.md             Index: what each file was, what replaced it, why kept
   2025-original/        Pre-standardisation state
@@ -74,6 +78,10 @@ Rules:
   wrong numbers looked plausible.
 - **Code that is knowingly wrong or unvalidated cites its `M-nn` ID in a
   comment**, so code and log stay tied together.
+- **Run `python tools/log_audit.py` after touching either log.** It checks the
+  logs against their own rules and exits nonzero on a violation. It found two
+  entries in `research-log.md` missing a required field, written by the session
+  that wrote the rule.
 - **Two logs, both live.** `method-log.md` (M-nn) came first and holds
   precedence; `research-log.md` (H-nn/O-nn) continues into rounds 2-3. They were
   written independently and independently reached the same round-1 findings.
