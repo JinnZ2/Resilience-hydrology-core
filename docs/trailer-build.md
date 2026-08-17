@@ -21,8 +21,20 @@ Total: $45
 - [data...]
 Average: 95ml/night
 
+> **Not comparable to model output.** Collector area was never recorded, so
+> ml/night cannot be converted to the mm/day the simulations report. No unpowered
+> control ran alongside, so this figure is total collection, not collection
+> attributable to the system. Two of the seven nights failed (see below), so the
+> average covers an unstated subset. This build does **not** validate the models.
+> See [method-log.md](method-log.md) M-07 for what a comparable run needs:
+> collector area in m², a paired unpowered control, per-night T_day / T_night /
+> RH, and every night logged including failures.
+
 ## Code
-See /resilience-hydrology-core/firmware/esp32/trailer-basic/
+See [`../firmware/esp32_basic/`](../firmware/esp32_basic/) — note that the
+firmware carried a GPIO5 pin collision (air sensor vs. SD chip-select) until
+2026-08. If this build logged to an SD card, its air temperatures may be
+unreliable. See method-log.md M-06.
 
 ## Failures
 - Condensation froze on night 4 (need insulation)

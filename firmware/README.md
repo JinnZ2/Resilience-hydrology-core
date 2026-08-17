@@ -10,6 +10,23 @@ MicroPython code for ESP32 microcontrollers.
 - **Cost**: ~$18
 - **Code**: `esp32_basic/main.py`
 
+## Pin Map
+
+| GPIO | Function |
+|---|---|
+| 4 | DS18B20 #1 (ground sensor), 4.7k pullup |
+| 5 | DS18B20 #2 (air sensor), 4.7k pullup |
+| 18 / 23 / 19 | SD card SCK / MOSI / MISO (optional) |
+| 15 | SD card CS (optional) |
+| 2 | Status LED |
+
+> SD chip-select was on GPIO5 until 2026-08, colliding with the air sensor's
+> OneWire bus. With a card fitted, air readings — and therefore `delta_t`, the
+> only quantity this node exists to measure — were silently logged as `NA`.
+> Moved to GPIO15; `TemperatureLogger.__init__` now raises on any future
+> collision. **Unverified on hardware** (GPIO15 is an ESP32 strapping pin, must
+> be high at boot). Confirm and record in `docs/method-log.md` M-06.
+
 ## Quick Start
 
 ```bash

@@ -1,148 +1,112 @@
-# Resilience Hydrology System
+# Resilience Hydrology Core
 
 Physics-based water harvesting using natural atmospheric gradients.
+Open research — models, firmware, and a record of what has and hasn't held up.
 
-## The Problem
-During drought, conventional irrigation fails. Wells go dry, rivers stop flowing, 
-water becomes scarce. People and crops suffer.
+## The problem
 
-## This Approach
-Instead of pumping or transporting water, we amplify the natural process of dew 
+During drought, conventional irrigation fails. Wells go dry, rivers stop flowing.
+People and crops suffer.
+
+## The approach
+
+Instead of pumping or transporting water, amplify the natural process of dew
 formation using temperature, pH, and light gradients that exist everywhere.
 
-Output: 0.034-0.14 mm/day depending on conditions and energy available.
+## Where this actually stands
 
-## How It Works
-( read repo files )
+Read this before quoting any number from this repository.
 
-## Status
-Working prototypes in testing. Code is functional. Hardware is proven.
+| | Status |
+|---|---|
+| Simulations | Run and produce output |
+| Physics models | **Not validated.** Core coefficients underived |
+| Prototype hardware | Built, collected water (Nov 2025, northern MN) |
+| Field vs. model | **Never compared** — the field log lacks collector area |
+| Seed optimisation | **Degenerate.** Objective does not select a seed |
 
-This is OPEN SOURCE research. Use it, modify it, share it.
+Modelled output, `simulations/01_basic_dew.py`:
 
-## Quick Start
-- **Researchers**: See /theory for equations and models
-- **Builders**: See /hardware for schematics and BOM
-- **Coders**: See /firmware for ESP32/Arduino code
-- **Users**: See [drought-survival-builds repo] for complete build guides
+- **0.054–0.100 mm/day** unamplified, across the four climate presets
+- **0.162–0.300 mm/day** with the assumed 3× system gain
 
-## Contributing
-[Link to CONTRIBUTING.md]
+The 3× gain is an assumption, not a measurement. Earlier versions of this README
+advertised "0.034–0.14 mm/day"; that figure came from a different model that is
+no longer in this repository and has been withdrawn — see
+[`docs/method-log.md`](docs/method-log.md) M-01.
 
-## License
-MIT - do whatever you want with this, just don't blame us if it breaks
+**Honest summary of scale:** at modelled output levels this supplements water
+supply by a fraction of a percent of crop demand. It is not drought mitigation.
+Closing a drought needs roughly 3 mm/day — about 10× the most optimistic figure
+this model produces (M-05).
 
-Three Use Cases
-1. I Want to Understand the Science
-Start with: simulations/01_basic_dew_simulation.py
-Run time: 30 seconds
-Output: Graph showing how system produces water
-2. I Want to Build Hardware
-Start with: hardware/trailer_dew_collector/
-Cost: $45
-Time: 1 day
-Output: Working dew collector producing 50-100ml/night
-3. I Want to Deploy at Scale
-Start with: simulations/03_seed_optimization.py to find optimal seeds for your climate
-Then: hardware/basic_sensor_node/ to build field nodes
-Cost: $180/node, 100 nodes/hectare
-Current Status
-	•	✅ Physics models validated
-	•	✅ Simulations running
-	•	✅ Prototype hardware tested (northern MN, Nov 2025)
-	•	🚧 Field testing in progress
-	•	🚧 Documentation being improved
+## Repository layout
 
+```
+simulations/     Python models (numpy/matplotlib/scipy)
+firmware/        MicroPython for ESP32 sensor nodes
+docs/            Build guides, theory notes, and the method log
+legacy/          Superseded files, frozen — the precedence record
+```
 
----
-
-### `/quick-start.md`
-
-```markdown
-# Quick Start Guide
-
-## For Simulation (No Hardware Needed)
-
-**Time: 5 minutes**
+## Quick start
 
 ```bash
-# Install dependencies
-pip install numpy matplotlib scipy
+pip install -r requirements.txt
 
-# Run basic simulation
-python simulations/01_basic_dew_simulation.py
+python simulations/01_basic_dew.py --climate arid --days 14
+python simulations/02_crop_response.py --water 0.27
+python simulations/03_seed_optimization.py
+```
 
-# You'll see:
-# - Graph of water production over 7 days
-# - Comparison of system ON vs OFF
-# - Total water collected
+See [`simulations/README.md`](simulations/README.md) for what each model does and
+where each one is known to be wrong.
 
+## Three ways in
 
-What you’re seeing: Mathematical model showing how the system would perform in your climate.
-For Hardware Build (Beginner Level)
-Time: 4 hours | Cost: $45
-Shopping List
+**Understand the science** — start with `simulations/01_basic_dew.py`, then read
+`docs/method-log.md`. The second file is the more useful of the two: it says
+which parts of the first are load-bearing and which are placeholders.
 
+**Build hardware** — `docs/build-guide.md` for builds by budget,
+`docs/trailer-build.md` for a real build with its failures recorded, and
+`firmware/esp32_basic/` for the sensor node. Roughly $45 for the basic build.
 
-1. ESP32 development board ($8)
-2. DS18B20 temperature sensors (2×) ($10)
-3. 5V Peltier cooler ($15)
-4. 18650 battery + holder ($5)
-5. Solar panel (5W) ($7)
-6. Wires, breadboard, container (misc)
+**Contribute a measurement** — the single most valuable thing anyone can add.
+M-07 in the method log lists exactly what a comparable field run needs: collector
+area, a paired unpowered control, per-night conditions, and every night including
+the failures. One careful week of that closes the largest gap in this project.
 
+## How this project handles claims
 
-Buy links: See hardware/trailer_dew_collector/parts_list.csv
-Build Steps
-	1.	Wire the sensors
+Hypothesize → run → compare → if falsified, **edit the claim, not the model** →
+list what you didn't know → rerun.
 
-ESP32 GPIO4 → DS18B20 #1 (ground sensor)
-ESP32 GPIO5 → DS18B20 #2 (air sensor)
-ESP32 3.3V  → Both sensors VCC
-ESP32 GND   → Both sensors GND
+Falsified claims are kept, not deleted. `docs/method-log.md` is the running
+record: every claim, what happened when it was tested, what it was changed to,
+and what that revealed we didn't know. Superseded files go to `legacy/` frozen,
+because a falsification you can't trace back to its source is just an assertion.
 
+The recurring failure mode this repo has already hit four times: a number
+outliving the model that produced it, getting re-attached to different code, and
+being repeated until it reads as established. If you add a number, make it
+traceable to a command someone can run today or a measurement someone recorded
+with its conditions. If it's neither, label it a hypothesis and give it an ID.
 
-2.	Flash the firmware
+## Contributing
 
-cd firmware/esp32_basic
-# See FLASH_INSTRUCTIONS.md
+Most useful, in order:
 
+1. Field measurements taken to the M-07 protocol
+2. Derivation or a source for `DEW_COEFF` (M-01) — or a replacement condensation
+   model that isn't a bare scaling relation
+3. Hardware confirmation of the GPIO15 SD chip-select fix (M-06)
+4. Plain-English explanations, translations, and use cases
 
-3.	Assemble the collector
+Report failures as readily as successes. `docs/trailer-build.md` records icing
+and a dead battery, and is more useful for it.
 
-from simulations.crop_response import CropResponseSimulator
+## License
 
-sim = CropResponseSimulator()
-
-# Run with your climate data
-result = sim.simulate_crop_season(
-    crop_name='wheat',
-    natural_precip=0.034,  # mm/day from system
-    drought_start=30,
-    drought_duration=60
-)
-
-print(f"Yield improvement: {result['yield']:.1%}")
-
-
-See simulations/README.md for full API.
-For Farmers
-Find optimal configuration for your climate
-
-from simulations.seed_optimization import optimize_for_climate
-
-# Your location
-climate_data = {
-    'T_day': 308,    # Kelvin (35°C)
-    'T_night': 288,  # Kelvin (15°C)
-    'RH': 0.25,      # 25% relative humidity
-    'lat': 35.0,     # degrees
-    'lon': -95.0
-}
-
-# Find best seed
-optimal_seed = optimize_for_climate(climate_data)
-print(f"Use seed: {optimal_seed}")
-print(f"Expected water: {optimal_seed['precip_mm_day']:.3f} mm/day")
-
-
+MIT for code, CC-BY-SA 4.0 for documentation. Use it, modify it, share it — just
+don't blame us if it breaks.

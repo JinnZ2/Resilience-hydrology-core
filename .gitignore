@@ -1,0 +1,9 @@
+# Simulation output (regenerate with the scripts; do not commit)
+*.png
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
