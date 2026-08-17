@@ -10,10 +10,16 @@ Hardware:
 - MicroSD card (optional, for local storage)
 
 Wiring:
-- GPIO4 -> DS18B20 #1 (ground sensor)
-- GPIO5 -> DS18B20 #2 (air sensor)
+- GPIO4  -> DS18B20 #1 (ground sensor)
+- GPIO5  -> DS18B20 #2 (air sensor)
 - Both sensors: 3.3V and GND
 - 4.7k ohm pullup resistor on data lines
+
+Optional SD card (SoftSPI):
+- GPIO18 -> SCK
+- GPIO23 -> MOSI
+- GPIO19 -> MISO
+- GPIO15 -> CS   (was GPIO5, which collided with the air sensor -- see M-06)
 """
 
 import machine
@@ -26,10 +32,18 @@ import os
 
 LOG_INTERVAL = 300  # seconds (5 minutes)
 
+# SD card pins. CS must not collide with either OneWire pin (4, 5).
+SD_SCK, SD_MOSI, SD_MISO, SD_CS = 18, 23, 19, 15
+
 
 class TemperatureLogger:
     def __init__(self, pin_ground=4, pin_air=5):
         """Initialize temperature sensors."""
+        if SD_CS in (pin_ground, pin_air):
+            raise ValueError(
+                f"SD_CS (GPIO{SD_CS}) collides with a sensor pin "
+                f"(GPIO{pin_ground}, GPIO{pin_air})")
+
         self.ow_ground = onewire.OneWire(Pin(pin_ground))
         self.ow_air = onewire.OneWire(Pin(pin_air))
 
@@ -90,8 +104,8 @@ class TemperatureLogger:
 def setup_sd_card():
     """Initialize SD card for data logging."""
     try:
-        spi = SoftSPI(sck=Pin(18), mosi=Pin(23), miso=Pin(19))
-        sd = SDCard(spi, Pin(5))
+        spi = SoftSPI(sck=Pin(SD_SCK), mosi=Pin(SD_MOSI), miso=Pin(SD_MISO))
+        sd = SDCard(spi, Pin(SD_CS))
         os.mount(sd, '/sd')
         print("SD card mounted at /sd")
         return True

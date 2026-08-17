@@ -2,16 +2,29 @@
 
 ## Contents
 
-- **[research-log.md](research-log.md)** — What has been claimed, what was
-  tested, what was falsified, and what is still open. **Read this before citing
-  any number from this repository.**
+- **[method-log.md](method-log.md)** - **Start here.** Claims, tests, falsifications, and open unknowns
+- **[research-log.md](research-log.md)** - Second falsification record, covering
+  rounds 2-3: constrained variable search, transition analysis, and the first
+  model-vs-measurement comparison
 - **[build-guide.md](build-guide.md)** - Hardware builds by budget ($50-$2000)
 - **[trailer-build.md](trailer-build.md)** - Real-world trailer dew collector with results
 - **[atmospheric-seed-theory.md](atmospheric-seed-theory.md)** - Research notes on seed expansion physics
 
-Superseded documents are archived with their original dates in
-[../legacy/](../legacy/README.md) rather than deleted, so revised claims can be
-read against the wording they replaced.
+The method log is listed first on purpose. It says which numbers elsewhere in
+these docs are supported and which are hypotheses, and several published figures
+have already been withdrawn there. Reading a claim in this directory without
+checking its method-log status is how those figures survived as long as they did.
+
+Two logs, deliberately. `method-log.md` (M-nn) and `research-log.md` (H-nn, O-nn)
+were written independently and reached the same round-1 findings by different
+routes — a natural replication, and worth keeping as one. `method-log.md` came
+first and holds precedence; `research-log.md` continues past it into rounds 2-3.
+Where they overlap, the M-entry is the original record. See
+[log-format-comparison.md](log-format-comparison.md) for what each format is
+good at, tested rather than argued.
+
+Superseded documents live frozen in [`../legacy/`](../legacy/README.md), which is
+where the method log's provenance trails lead.
 
 ## Who is this for?
 
@@ -24,16 +37,13 @@ read against the wording they replaced.
 ## Contributing
 
 We need:
-- Field measurements that can be compared against the models — collector area,
-  nightly volume, and logged temperature/humidity together (see O1 in the
-  research log). This is the biggest gap in the project.
+- Field measurements that can be compared against the models - collector area,
+  tilt angle, nightly volume, and logged temperature/humidity together. This is
+  the biggest gap in the project (method-log M-07, research-log O1/H9)
 - Falsifications: run something here, show it doesn't do what it claims
 - Plain-English explanations of the science
 - Use cases and field reports
 - Translations to other languages
-
-When a claim changes, record it in [research-log.md](research-log.md) and
-archive the previous wording in `legacy/`.
 
 ## License
 

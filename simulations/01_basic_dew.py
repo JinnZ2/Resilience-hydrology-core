@@ -27,23 +27,24 @@ class DewSimulator:
     """
     Dew formation simulator.
 
-    Physics:
-    - Temperature inversion at night drives condensation
-    - Energy input: zero (natural mode) or <1W (boosted)
+    Physics (as implemented -- see docs/method-log.md for what is NOT here):
+    - Natural dew scales with RH * (T_day - T_night) * DEW_COEFF
+    - System multiplies that by AMPLIFICATION when on
+    - Energy input is not modeled
 
-    ASSUMPTION, not a result: the system amplifies the natural process by a
-    hard-coded factor of 3.0 (see simulate_night). That factor is an input, so
-    the ON vs OFF comparison illustrates the assumption rather than testing it,
-    and every climate reports exactly +200%. Nothing in this repository derives
-    or measures it. See docs/research-log.md, H2 and O3.
+    NOT modeled: dew point, surface temperature, condenser area, collection
+    efficiency, wind, radiative cooling. This is a scaling relation, not a
+    condensation model. Absolute mm/day values are unvalidated (M-01, M-05).
     """
+
+    # Empirical constants. Neither has been derived or fitted to field data.
+    DEW_COEFF = 0.02      # mm per (RH-fraction * K of diurnal swing) -- unsourced
+    AMPLIFICATION = 3.0   # claimed system gain -- unmeasured (M-02)
 
     def __init__(self, T_day=305, T_night=288, RH=0.30):
         self.T_day = T_day
         self.T_night = T_night
         self.RH = RH
-        self.dew_point_offset = 5.0  # K below air temp
-        self.collection_efficiency = 0.7
 
     def simulate_night(self, system_on=False):
         """
@@ -53,10 +54,9 @@ class DewSimulator:
             water_mm: millimeters of water collected per m^2
         """
         delta_T = self.T_day - self.T_night
-        natural_dew = self.RH * delta_T * 0.02  # mm/night
+        natural_dew = self.RH * delta_T * self.DEW_COEFF  # mm/night
 
-        # Assumed, not derived — see class docstring and research log H2.
-        amplification = 3.0 if system_on else 1.0
+        amplification = self.AMPLIFICATION if system_on else 1.0
         return natural_dew * amplification
 
     def run(self, days=7, system_on=True):

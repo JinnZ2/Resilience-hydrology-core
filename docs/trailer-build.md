@@ -31,9 +31,26 @@ cannot be converted to mm/day per m², which is the unit the simulations output 
 so this dataset cannot currently be compared to any model in the repository.
 Anyone repeating this build: measure the area (research log, O1).
 
+> **Not comparable to model output.** Collector area was never recorded, so
+> ml/night cannot be converted to the mm/day the simulations report. No unpowered
+> control ran alongside, so this figure is total collection, not collection
+> attributable to the system. Two nights failed, so any average covers an
+> unstated subset. This build does **not** validate the models. See
+> [method-log.md](method-log.md) M-07 for what a comparable run needs: collector
+> area in m², a paired unpowered control, per-night T_day / T_night / RH, and
+> every night logged including failures.
+
 ## Code
 See [firmware/esp32_basic/](../firmware/esp32_basic/) — `main.py` logs the
 ground/air temperature gradient. There is no separate trailer-specific firmware.
+
+Note that this firmware carried a **GPIO5 pin collision** (air sensor OneWire vs
+SD chip-select) until 2026-08. If this build logged to an SD card, its air
+temperatures may be unreliable — see [method-log.md](method-log.md) M-06. That
+would affect any attempt to reconstruct the conditions of these two nights.
+
+For a node that can actually test the models, see
+[`../firmware/esp32_validation/`](../firmware/esp32_validation/).
 
 ## Failures
 - Condensation froze on night 4 (need insulation)
@@ -45,7 +62,7 @@ ground/air temperature gradient. There is no separate trailer-specific firmware.
 protection, double solar panel size". Both were aimed at keeping the Peltier
 running, and the analysis says the Peltier is the part to remove. Original
 wording preserved at
-[`legacy/docs/trailer-build_2025-12-07.md`](../legacy/docs/trailer-build_2025-12-07.md);
+[`legacy/2025-original/trailer-build.md`](../legacy/2025-original/trailer-build.md);
 reasoning in [`research-log.md`](research-log.md), H8 and Round 3.
 
 In order, cheapest first:
@@ -75,5 +92,9 @@ run on a well configured one it gives a mean of 35 mL with a best night around
 140 mL, which brackets the 85 and 110 recorded here. Both readings are
 consistent with the data, and nothing in the notebook distinguishes them.
 
-A tape measure and a protractor would have settled it. See
-[`research-log.md`](research-log.md), H9 and O1.
+A tape measure and a protractor would have settled the configuration question. A
+paired unpowered control would have settled the attribution question — without
+one, even a perfectly recorded volume cannot separate "the system worked" from
+"dew formed, as it does on any cold surface". See
+[`research-log.md`](research-log.md) H9 and O1, and
+[`method-log.md`](method-log.md) M-07.

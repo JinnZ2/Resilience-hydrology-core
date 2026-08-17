@@ -6,7 +6,7 @@ Practical, buildable water harvesting systems for drought conditions.
 > tiers. It now leads with two free decisions, because the transition analysis
 > found that every hardware upgrade in it is close to worthless until those two
 > decisions are made — and large afterwards. The original guide is preserved at
-> [`legacy/docs/build-guide_2025-12-07.md`](../legacy/docs/build-guide_2025-12-07.md);
+> [`legacy/2025-original/BUILD-README.md`](../legacy/2025-original/BUILD-README.md);
 > what changed and why is in [`research-log.md`](research-log.md), Round 3.
 
 ## Build in this order
@@ -116,9 +116,11 @@ The simulations carry presets for:
 - Mediterranean (dry summers)
 - Tropical dry (monsoon climate)
 
-Note: builds do **not** ship optimized seeds. The seed optimizer returns a
-degenerate answer for every climate and its output should not be deployed — see
-[`research-log.md`](research-log.md), H5. For siting and configuration
+> **Withdrawn:** builds do *not* ship seeds optimised per climate. The seed
+> optimiser's objective is degenerate — it returns minimum amplification for
+> every climate, and two of its five bytes have no effect on the result at all.
+> See [method-log.md](method-log.md) M-03 and [research-log.md](research-log.md)
+> H5. For siting and configuration
 decisions use `simulations/04_variable_search.py` and
 `simulations/05_transition_paths.py` instead.
 

@@ -7,13 +7,12 @@ Physics-based atmospheric water harvesting using natural environmental gradients
 This system amplifies natural dew/fog formation to collect water during drought.
 It uses temperature, pH, and light gradients — no pumps, no wells, no infrastructure.
 
-Modelled output: 0.054-0.100 mm/day passive, 0.162-0.300 mm/day with the system
-on, across the four climate presets. These are simulation outputs and have never
-been compared against field measurements. The "system on" figures inherit a
-hard-coded 3x amplification assumption.
+Modelled output (`simulations/01_basic_dew.py`): 0.054-0.100 mm/day unamplified,
+0.162-0.300 mm/day with the assumed 3x gain. Unvalidated against field data.
 
-An earlier headline figure of 0.034-0.14 mm/day was withdrawn as not
-reproducible from the code — see `docs/research-log.md`, H1.
+The previously documented "0.034-0.14 mm/day" figure was withdrawn — it came
+from an ion-coupling model that is not in this repository. See
+`docs/method-log.md` M-01 before quoting any output number.
 
 ## Repository Structure
 
@@ -21,80 +20,92 @@ reproducible from the code — see `docs/research-log.md`, H1.
 simulations/          Python models (numpy/matplotlib/scipy)
   01_basic_dew.py       Basic dew collection simulation (ON vs OFF comparison)
   02_crop_response.py   Crop yield impact during drought
-  03_seed_optimization.py  Optimal 40-bit seed finder using differential evolution
+  03_seed_optimization.py  Seed search; reports its own degeneracy (M-03)
   04_variable_search.py    Constrained variable search: sensitivity, optimal
                            ranges, ecological levers, measurement priorities
   05_transition_paths.py   Cheapest ordered changes from a deployed build to a
                            better one, scored under our own uncertainty
 firmware/             MicroPython code for ESP32 hardware nodes
   esp32_basic/          Basic temperature logger (DS18B20 sensors)
-  esp32_validation/     Adds surface temp, humidity, and volume - the sensors
-                        needed to test the model against reality
 docs/                 Documentation, build guides, research notes
-  research-log.md       Claims tested, falsified, revised; open questions
+  method-log.md         Claims, tests, falsifications, open unknowns (read first)
+  research-log.md       Second falsification record; rounds 2-3 continue past
+                        the method log (H-nn entries, O-nn open questions)
   build-guide.md        Hardware builds by budget ($50-$2000)
   trailer-build.md      Real-world trailer dew collector results
   atmospheric-seed-theory.md  Research notes on seed expansion physics
-legacy/               Superseded originals, archived by date — never deleted
-  README.md             Index: what each archived file is and what replaced it
-  simulations/          Original dew models (2025-12-07)
-  firmware/             Original ESP32 logger, incl. unfinished SD-card path
-  notes/                Full 4,404-line seed expansion research session
-  docs/                 Original READMEs, preserving pre-revision claims
+legacy/               Superseded files, frozen — the precedence record
+  README.md             Index: what each file was, what replaced it, why kept
+  2025-original/        Pre-standardisation state
 ```
 
 ## Tech Stack
 
 - **Simulations**: Python 3, numpy, matplotlib, scipy
 - **Firmware**: MicroPython on ESP32
-- **Sensors**: DS18B20 (temperature, OneWire), SHT31-D (humidity, I2C),
-  tipping-bucket gauge (interrupt)
+- **Sensors**: DS18B20 (temperature), OneWire protocol
 
 ## Conventions
 
 - Python files use snake_case for functions, variables, and file names
 - Classes use PascalCase
-- Simulation files are numbered: `01_` through `05_`
+- Simulation files are numbered: `01_`, `02_`, `03_`
 - Units: mm/day for water output, Kelvin for temperatures in code, Celsius in display
 - Climate presets: arid, semi_arid, mediterranean, tropical_dry
 
-### Evidence conventions
+## Claim Discipline
 
-This project runs on an explicit scientific loop: hypothesize → run → compare →
-revise the claim → list unknowns → rerun. Two rules follow from it:
+This repo keeps a falsification record in `docs/method-log.md`. It exists because
+the same failure has already occurred four times: a number outlived the model
+that produced it, was re-attached to different code, and got repeated until it
+read as established (M-01, M-03, M-05, M-08).
 
-- **Never delete a superseded file or claim.** Archive it under `legacy/` with
-  its original date and add an entry to `legacy/README.md`. Precedence stays
-  with whoever wrote it first, so a revision must remain readable as a revision.
-- **Every number in the docs is either a model output with the command that
-  reproduces it, or is marked untested.** No numbers without provenance. When a
-  run contradicts a documented claim, revise the claim in the same commit and
-  log it in `docs/research-log.md` (format is at the bottom of that file).
+Rules:
+
+- **Check the method log before quoting any number.** Several published figures
+  have been withdrawn there.
+- **Every number must trace to a command runnable today, or a recorded
+  measurement with its conditions.** If it's neither, it's a hypothesis — label
+  it and give it an `M-nn` ID.
+- **When a run disagrees with the docs, edit the claim, not the model.** Tuning
+  constants until the output matches an already-published number destroys the
+  evidence. M-03 is deliberately left broken for this reason.
+- **State the prediction before reading the output.** M-04 hid for a year because
+  wrong numbers looked plausible.
+- **Code that is knowingly wrong or unvalidated cites its `M-nn` ID in a
+  comment**, so code and log stay tied together.
+- **Two logs, both live.** `method-log.md` (M-nn) came first and holds
+  precedence; `research-log.md` (H-nn/O-nn) continues into rounds 2-3. They were
+  written independently and independently reached the same round-1 findings.
+  Where they overlap, cite the M-entry as the original.
+- **Superseded files go to `legacy/` frozen, never deleted** — including, and
+  especially, ones whose claims were falsified. Nothing current imports from
+  `legacy/`; cite it, don't copy numbers out of it.
 
 ## Running Simulations
 
 ```bash
 pip install -r requirements.txt
-python simulations/01_basic_dew.py
-python simulations/02_crop_response.py
-python simulations/03_seed_optimization.py
+python simulations/01_basic_dew.py --climate arid --days 14
+python simulations/02_crop_response.py --water 0.27
+python simulations/03_seed_optimization.py   # reports its own degeneracy (M-03)
 python simulations/04_variable_search.py --condensing-only
 python simulations/05_transition_paths.py
-```
 
 Numbered filenames start with a digit, so they cannot be imported normally.
-`05_transition_paths.py` loads `04_variable_search.py` via importlib; follow
-that pattern if another file needs to reuse a model.
+`05_transition_paths.py` loads `04_variable_search.py` via importlib; follow that
+pattern if another file needs to reuse a model.
+```
 
 ## Key Classes
 
 - `DewSimulator` — Core dew formation model (simulations/01_basic_dew.py)
 - `CropWaterModel` — Crop water stress during drought (simulations/02_crop_response.py)
-- `SeedOptimizer` — Evolutionary seed optimization (simulations/03_seed_optimization.py).
-  Known degenerate: the objective always prefers minimum amplification, and 2 of
-  its 5 seed bytes are unused. Do not treat its output as usable seeds.
-- `DewEnergyBalance` — Surface energy-balance dew model, the physically
-  structured alternative to `DewSimulator` (simulations/04_variable_search.py)
+- `SeedOptimizer` — Evolutionary seed optimization (simulations/03_seed_optimization.py)
+- `DewEnergyBalance` — Surface energy-balance dew model: the physically
+  structured alternative to `DewSimulator`, and the only model here that checks
+  whether the surface actually reaches the dew point
+  (simulations/04_variable_search.py)
 - `VariableSearch` — Constrained sampling and sensitivity analysis
   (simulations/04_variable_search.py). Its `Variable` registry is the single
   place where variable bounds, kinds, and measurement status are declared.
@@ -106,16 +117,16 @@ that pattern if another file needs to reuse a model.
 
 ## Hardware
 
-- ESP32 dev board + DS18B20 sensors; add SHT31 and a tipping-bucket gauge for
-  the validation node
+- ESP32 dev board + 2x DS18B20 sensors + Peltier cooler
 - Total cost: $45-180 depending on build
-- **The Peltier cooler is no longer recommended.** At the energy budget these
-  builds have it delivers ~6% of the radiative cooling the surface already does
-  for free, worth about 1.11x against a claimed 3x (`docs/research-log.md`, H8).
-  Removing it recovers $15 and funds the changes that do work.
+- Field tested: northern Minnesota, November 2025 — collected water, but the run
+  is **not comparable to model output** (no collector area, no control). See M-07.
+- **The Peltier cooler is no longer recommended.** At these builds' energy
+  budget it delivers ~6% of the radiative cooling the surface already does for
+  free — worth ~1.11x against a claimed 3x (research-log H8). Removing it
+  recovers $15 and funds the changes that do work.
 - Build order matters more than the parts: season, then siting, then tilt. Each
-  hardware change is near-worthless before those and large after them (Round 3)
-- Field tested: northern Minnesota, November 2025 — one site, 2 nights recorded
-  (85 ml, 110 ml). Collector area was not measured, so these cannot yet be
-  converted to mm/day and compared against the models. Closing that gap is the
-  project's top open item (`docs/research-log.md`, O1).
+  hardware change is near-worthless before those and large after them (Round 3).
+- Pin map: GPIO4 ground sensor, GPIO5 air sensor, GPIO15 SD chip-select.
+  GPIO15 was moved off GPIO5 to resolve a collision with the air sensor (M-06);
+  the fix is unverified on hardware.

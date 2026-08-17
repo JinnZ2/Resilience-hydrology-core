@@ -1,191 +1,175 @@
 # Resilience Hydrology Core
 
 Physics-based water harvesting using natural atmospheric gradients.
+Open research — models, firmware, and a record of what has and hasn't held up.
 
 ## The problem
 
-During drought, conventional irrigation fails. Wells go dry, rivers stop
-flowing, water becomes scarce. People and crops suffer.
+During drought, conventional irrigation fails. Wells go dry, rivers stop flowing.
+People and crops suffer.
 
-## This approach
+## The approach
 
 Instead of pumping or transporting water, amplify the natural process of dew
 formation using temperature, pH, and light gradients that exist everywhere.
-No pumps, no wells, no infrastructure.
 
-## Status — read this before citing any number
+## Where this actually stands
 
-This is open research in progress, and the honest summary is short:
+Read this before quoting any number from this repository.
 
-- ✅ Simulations run and are internally consistent
-- ✅ Prototype hardware built and logging (northern Minnesota, Nov 2025)
-- ⚠️ **Models are not validated against field data.** No comparison between
-  modelled and measured output has been performed in this repository.
-- ⚠️ **The 3x amplification factor is an assumption, not a measurement.** It is
-  hard-coded into the simulation, so the ON/OFF comparison illustrates that
-  assumption rather than testing it.
-- 🚧 Field testing in progress — one site, partial data
+| | Status |
+|---|---|
+| Simulations | Run and produce output |
+| Physics models | **Not validated.** Core coefficients underived |
+| Prototype hardware | Built, collected water (Nov 2025, northern MN) |
+| Field vs. model | **Never compared** — the field log lacks collector area |
+| Seed optimisation | **Degenerate.** Objective does not select a seed |
+| Energy-balance model | Added round 2; structurally sound, still unvalidated |
+| Transition analysis | First stage costs −$3 and works today |
 
-Every claim below is either a model output with the command that reproduces it,
-or it is marked untested. What has been checked, what was falsified, and what
-was revised as a result is recorded in
-**[docs/research-log.md](docs/research-log.md)**.
+Modelled output, `simulations/01_basic_dew.py`:
 
-## What the model produces
+- **0.054–0.100 mm/day** unamplified, across the four climate presets
+- **0.162–0.300 mm/day** with the assumed 3× system gain
 
-Running `simulations/01_basic_dew.py` across the four climate presets:
+The 3× gain is an assumption, not a measurement. Earlier versions of this README
+advertised "0.034–0.14 mm/day"; that figure came from a different model that is
+no longer in this repository and has been withdrawn — see
+[`docs/method-log.md`](docs/method-log.md) M-01.
 
-| Climate | System OFF | System ON |
-|---|---|---|
-| arid | 0.100 mm/day | 0.300 mm/day |
-| semi_arid | 0.091 mm/day | 0.273 mm/day |
-| mediterranean | 0.054 mm/day | 0.162 mm/day |
-| tropical_dry | 0.080 mm/day | 0.240 mm/day |
-
-**These are model outputs, not measurements**, and the ON column inherits the
-assumed 3x factor. An earlier headline figure of "0.034–0.14 mm/day" was
-withdrawn — it is not reproducible from any code here (research log, H1). The
-original wording is preserved in
-[legacy/docs/README_2025-12-07.md](legacy/docs/README_2025-12-07.md).
-
-The one field measurement is 85 ml and 110 ml on two nights from the trailer
-build ([docs/trailer-build.md](docs/trailer-build.md)). Comparing it to a model
-has been attempted once (research log, H9) and came out **undetermined** — not
-because the physics failed, but because the collector's area and tilt angle were
-never written down, and the answer depends on both.
+**Honest summary of scale:** at modelled output levels this supplements water
+supply by a fraction of a percent of crop demand. It is not drought mitigation.
+Closing a drought needs roughly 3 mm/day — about 10× the most optimistic figure
+this model produces (M-05).
 
 ## What actually moves the yield
 
-`simulations/04_variable_search.py` samples a constrained variable space against
-a surface energy-balance model and ranks variables by how much they change the
-outcome. Three results are worth knowing before you build anything:
+`simulations/04_variable_search.py` replaces the bare scaling relation with a
+surface energy balance — radiative loss, convection, latent heat, conduction —
+and searches a constrained variable space for the *ranges* that improve yield.
+Unlike `01_basic_dew.py` it checks whether the surface actually reaches the dew
+point, which turns out to matter a great deal:
 
-- **Collector tilt is the largest design lever, and no build guide specifies an
-  angle.** It has a genuine best range (roughly 19–53°) because steeper drains
-  better but sees less cold sky.
-- **Siting beats electronics.** Canopy openness and upwind soil/plant moisture
-  rank above every hardware variable except tilt. Where you put the collector
-  matters more than what you put in it.
-- **Active cooling is nearly inert at the field build's power budget.** A 3 W/m²
-  electrical budget buys about 6% of the radiative cooling the surface already
-  does for free — worth 1.11x, not 3x. Reaching 3x would take roughly 19x the
-  power the $45 build has.
-
-Full numbers and method: [docs/research-log.md](docs/research-log.md), Round 2.
-These are model results, not measurements — see the caveat above.
+- **At the climate presets this repo ships, dew is thermodynamically
+  impossible.** Radiative cooling delivers 3–9 K of depression; those humidities
+  need 12–18 K. `01_basic_dew.py` reports water forming anyway, because it never
+  checks (research-log H7).
+- **Collector tilt is the largest lever a builder controls** — a real best range
+  of roughly 19–53°, and no build guide specified an angle.
+- **Siting beats electronics.** Canopy openness and upwind soil moisture outrank
+  every hardware variable except tilt.
+- **Active cooling is inert at the field power budget** — 6% of the radiative
+  cooling the surface already does for free, worth 1.11x. Reaching 3× would take
+  ~19× the power the $45 build has (H8).
 
 ## Already built one? Start here
 
-[`simulations/05_transition_paths.py`](simulations/05_transition_paths.py) takes
-an existing collector and returns the cheapest ordered set of changes. Its
-findings changed this project's build guidance:
+`simulations/05_transition_paths.py` takes an existing collector and returns the
+cheapest ordered set of changes, with costs, hours, and who has to act:
 
-- **Run it in the dew season.** At the one site this project has deployed to, in
-  the month it deployed, the model puts 47% of nights below freezing and 4%
-  making water. The same site in September: 0% frozen, 16% productive. The frost
-  failure in the field log was the season, not the hardware.
+- **Run it in the dew season.** At the one site this project deployed to, in the
+  month it deployed, 47% of nights freeze and 4% make water. September at the
+  same site: 0% and 16%. The night-4 frost failure was the season, not the
+  hardware.
 - **The first stage costs −$3.** Removing the Peltier pays for the bracket, the
-  foam, and the mulch, with change left over. No funding decision required.
-- **Order beats the parts list.** Angling the collector gains +0.1 mL/night on
-  its own and +10.9 once the free season and siting decisions are made. A guide
-  that lists parts without that ordering sells upgrades that appear not to work.
+  foam, and the mulch, with change left over.
+- **Order beats the parts list.** Angling the collector gains +0.1 mL/night alone
+  and +10.9 after the free season and siting decisions. A guide that lists parts
+  without that ordering sells upgrades that appear not to work.
 
 Every recommendation is scored across a Monte Carlo varying both the weather and
-this project's own assumed coefficients, so what survives does not depend on us
+this project's own assumed coefficients, so what survives doesn't depend on us
 being right about numbers we invented.
+
+## Repository layout
+
+```
+simulations/       Python models (numpy/matplotlib/scipy)
+  01-03            original models, with their known defects documented
+  04, 05           energy-balance search and transition analysis
+firmware/          MicroPython for ESP32 sensor nodes
+  esp32_basic/     temperature only
+  esp32_validation/ adds surface temp, humidity, volume — use this one
+docs/              Build guides, theory notes, and two falsification logs
+legacy/            Superseded files, frozen — the precedence record
+```
 
 ## Quick start
 
 ```bash
 pip install -r requirements.txt
 
-python simulations/01_basic_dew.py                        # 7-day dew model, ON vs OFF
 python simulations/01_basic_dew.py --climate arid --days 14
-python simulations/02_crop_response.py                    # crop yield during drought
-python simulations/03_seed_optimization.py                # seed search scaffold (see caveat)
-python simulations/04_variable_search.py --condensing-only  # what actually moves yield
-python simulations/05_transition_paths.py                   # cheapest changes to an existing build
+python simulations/02_crop_response.py --water 0.27
+python simulations/03_seed_optimization.py
+python simulations/04_variable_search.py --condensing-only
+python simulations/05_transition_paths.py
 ```
 
-Each writes a PNG to the working directory. See
-[simulations/README.md](simulations/README.md) for details.
-
-## Repository structure
-
-```
-simulations/     Python models (numpy / matplotlib / scipy)
-firmware/        MicroPython for ESP32 sensor nodes
-  esp32_basic/     temperature only
-  esp32_validation/ adds surface temp, humidity, volume - use this one
-docs/            Build guides, theory notes, research log
-legacy/          Superseded originals, archived with dates — never deleted
-```
+See [`simulations/README.md`](simulations/README.md) for what each model does and
+where each one is known to be wrong.
 
 ## Three ways in
 
-### 1. Understand the science
+**Understand the science** — start with `simulations/01_basic_dew.py`, then read
+`docs/method-log.md`. The second file is the more useful of the two: it says
+which parts of the first are load-bearing and which are placeholders.
 
-Start with [`simulations/01_basic_dew.py`](simulations/01_basic_dew.py) (runs in
-seconds), then read [docs/research-log.md](docs/research-log.md) to see which of
-its assumptions survive scrutiny and which do not. The theory behind the seed
-approach is in
-[docs/atmospheric-seed-theory.md](docs/atmospheric-seed-theory.md), condensed
-from the full 2025-12-07 research session in
-[legacy/notes/](legacy/notes/2025-12-07_seed-expansion-session.md).
+**Build hardware** — `docs/build-guide.md` for builds by budget,
+`docs/trailer-build.md` for a real build with its failures recorded, and
+`firmware/esp32_basic/` for the sensor node. Roughly $45 for the basic build.
+Build in the order the guide gives: season, siting, tilt. The order is the
+finding, not a formality.
 
-### 2. Build hardware
+**Make your build testable** — `firmware/esp32_validation/` adds collector
+surface temperature, humidity, and nightly volume for about $23. The trailer
+build reported 85 ml and 110 ml, but nobody recorded its area or tilt — and the
+energy-balance model reproduces those volumes under a well-configured collector
+while producing almost nothing under a poorly-configured one. Both readings fit
+the notebook. A tape measure and a protractor are the difference between a
+validated model and a stalled project (H9).
 
-[docs/build-guide.md](docs/build-guide.md) covers builds by budget.
-[docs/trailer-build.md](docs/trailer-build.md) is a real $45 build with its
-results *and its failures* — frost on night 4, dead battery on day 6. Firmware
-and flashing steps are in [firmware/](firmware/README.md).
+**Contribute a measurement** — the single most valuable thing anyone can add.
+M-07 in the method log lists exactly what a comparable field run needs: collector
+area, a paired unpowered control, per-night conditions, and every night including
+the failures. One careful week of that closes the largest gap in this project.
 
-The most useful thing a builder can contribute right now is a paired
-measurement: collector area, nightly volume, and logged temperature/humidity.
-That is the missing piece that would let the model be checked against reality
-(research log, O1).
+## How this project handles claims
 
-The whole measurement kit is **$23 and about four hours**:
-[`firmware/esp32_validation/`](firmware/esp32_validation/) logs collector
-surface temperature, humidity, and nightly volume, and takes the collector area
-and tilt angle as constants you write down once.
+Hypothesize → run → compare → if falsified, **edit the claim, not the model** →
+list what you didn't know → rerun.
 
-Those last two matter more than they sound. The trailer build reported 85 ml and
-110 ml, but nobody recorded its area or angle — and the model reproduces those
-volumes under a well-configured collector while producing almost nothing under a
-poorly-configured one. Both are consistent with the notebook. A tape measure and
-a protractor are the difference between a validated model and a stalled
-project (research log, H9).
+Falsified claims are kept, not deleted. There are two records:
+[`docs/method-log.md`](docs/method-log.md) (M-nn) came first and holds
+precedence, and [`docs/research-log.md`](docs/research-log.md) (H-nn, O-nn)
+continues into rounds 2–3. They were written independently and reached the same
+round-1 findings by different routes — an accidental replication, kept as one.
+Between them they record: every claim, what happened when it was tested, what it was changed to,
+and what that revealed we didn't know. Superseded files go to `legacy/` frozen,
+because a falsification you can't trace back to its source is just an assertion.
 
-### 3. Deploy at scale
-
-Not yet supported. `03_seed_optimization.py` currently returns a degenerate
-answer — the minimum of its search range for every climate, plus two unused
-random bytes — because its objective always prefers less amplification
-(research log, H5). **Do not deploy seeds it publishes.** The scaffold is kept
-because the search structure is sound; the cost model is what is missing.
-
-For siting and configuration decisions, use
-[`simulations/04_variable_search.py`](simulations/04_variable_search.py)
-instead. It answers the same question without the degeneracy, reports ranges
-rather than points, and flags when an "optimum" is really just a bound.
+The recurring failure mode this repo has already hit four times: a number
+outliving the model that produced it, getting re-attached to different code, and
+being repeated until it reads as established. If you add a number, make it
+traceable to a command someone can run today or a measurement someone recorded
+with its conditions. If it's neither, label it a hypothesis and give it an ID.
 
 ## Contributing
 
-Most valuable, in order:
+Most useful, in order:
 
-1. **Field measurements** that can be compared to the model (see O1 in the
-   research log)
-2. **Falsifications** — run something here, show it does not do what it claims,
-   open an issue with the numbers
-3. Plain-English explanations, use cases, translations
+1. Field measurements taken to the M-07 protocol
+2. Derivation or a source for `DEW_COEFF` (M-01). `simulations/04_variable_search.py`
+   is a first attempt at the replacement condensation model this asks for — it is
+   structured from physics rather than fitted, but its own transfer coefficients
+   are still assumed (O10) and it has never met field data either
+3. Hardware confirmation of the GPIO15 SD chip-select fix (M-06)
+4. Plain-English explanations, translations, and use cases
 
-If you revise a claim, follow the convention this repository runs on: state the
-new claim with its evidence, and archive the old wording in `legacy/` rather
-than overwriting it. Precedence stays with whoever wrote it first —
-see [legacy/README.md](legacy/README.md).
+Report failures as readily as successes. `docs/trailer-build.md` records icing
+and a dead battery, and is more useful for it.
 
 ## License
 
-MIT — do whatever you want with this, just don't blame us if it breaks.
-Documentation under CC-BY-SA 4.0.
+MIT for code, CC-BY-SA 4.0 for documentation. Use it, modify it, share it — just
+don't blame us if it breaks.

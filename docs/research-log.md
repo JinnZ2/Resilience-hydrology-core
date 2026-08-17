@@ -55,7 +55,7 @@ docs asserted. Environment: Python 3, numpy/matplotlib/scipy per
 ### H1 — "Output: 0.034-0.14 mm/day depending on conditions and energy available"
 
 - **Source**: root README, first written 2025-12-07; archived verbatim at
-  [`legacy/docs/README_2025-12-07.md`](../legacy/docs/README_2025-12-07.md).
+  [`legacy/2025-original/README.md`](../legacy/2025-original/README.md).
 - **Prediction**: `01_basic_dew.py` produces daily rates inside 0.034–0.14 mm/day.
 - **Run**: `python simulations/01_basic_dew.py --climate {arid,semi_arid,mediterranean,tropical_dry}`
 - **Result**:
@@ -72,9 +72,14 @@ docs asserted. Environment: Python 3, numpy/matplotlib/scipy per
   reproducible from any code in this repository at any preset.
 - **Where the numbers came from**: `0.034` appears in
   [`02_crop_response.py`](../simulations/02_crop_response.py) as the assumed
-  system water input, so the low end is likely a hand-carried constant rather
-  than a model output. The origin of `0.14` was not found anywhere in the
-  repository or its history. → **O2**
+  system water input. The origin of `0.14` was not found — logged as O2.
+  **O2 is now closed, by [`method-log.md`](method-log.md) M-01**, written
+  independently and merged on 2026-08-16: both figures are printed outputs of an
+  ion-coupling PDE model that was never committed as code, surviving only in
+  [`legacy/2025-original/firmware__02_crop_response.md`](../legacy/2025-original/firmware__02_crop_response.md)
+  — 0.034 mm/day for natural gradient coupling, 0.14 mm/day for active ion
+  injection at 5.8 kWh/day. The number outlived its model and was re-attached to
+  unrelated code. Credit to M-01; that entry has precedence on this finding.
 - **Revised claim**: the README now states the model's ON range,
   0.16–0.30 mm/day, labels it as model output rather than measurement, and names
   the command that reproduces it.
@@ -89,7 +94,7 @@ docs asserted. Environment: Python 3, numpy/matplotlib/scipy per
 - **Result**: `amplification = 3.0 if system_on else 1.0` — a hard-coded
   constant. Every climate reports "Improvement: +200%", exactly, because 3.0 is
   an input, not a result. The same constant is in the 2025-12-07 original
-  ([`legacy/simulations/01_basic_dew_simulation.py`](../legacy/simulations/01_basic_dew_simulation.py))
+  ([`legacy/2025-original/simulations__01_basic_dew_simulation.py`](../legacy/2025-original/simulations__01_basic_dew_simulation.py))
   and was carried through the 2026-03 rewrite unchanged.
 - **Verdict**: **FALSIFIED as a result; retained as an assumption.** The
   simulation cannot test the central hypothesis of the project, because the
@@ -466,11 +471,11 @@ The point of the loop is that findings change the artifact. What was altered:
 - **[`docs/build-guide.md`](build-guide.md)** rewritten to lead with the two
   free decisions and to specify a tilt angle; Peltier moved from a component to
   an explicit "do not fit". Original preserved at
-  [`legacy/docs/build-guide_2025-12-07.md`](../legacy/docs/build-guide_2025-12-07.md).
+  [`legacy/2025-original/BUILD-README.md`](../legacy/2025-original/BUILD-README.md).
 - **[`docs/trailer-build.md`](trailer-build.md)** — the "next iteration" list
   (frost heater, bigger panel) was replaced. Both existed to keep the Peltier
   running; both are now the wrong spend. Original preserved at
-  [`legacy/docs/trailer-build_2025-12-07.md`](../legacy/docs/trailer-build_2025-12-07.md).
+  [`legacy/2025-original/trailer-build.md`](../legacy/2025-original/trailer-build.md).
 - **[`firmware/esp32_validation/`](../firmware/esp32_validation/)** — new
   firmware logging collector surface temperature, humidity, and tipping-bucket
   volume, with collector area and tilt as mandatory site constants that refuse
@@ -489,15 +494,16 @@ Carried forward. Each names what would close it.
   enough to convert ml/night to mm/day per m² and compare against
   `DewSimulator.simulate_night` for that site's actual conditions. The firmware
   logs the temperatures already; nothing logs collected volume or area.
-- **O2 — Provenance of the 0.034–0.14 mm/day range.** `0.034` is traceable to
-  the crop model's input constant. `0.14` is not traceable to anything in this
-  repository. If it came from a measurement or an external source, that source
-  should be cited in the README; if it cannot be found, the number should stay
-  retired.
+- ~~**O2 — Provenance of the 0.034–0.14 mm/day range.**~~ **CLOSED 2026-08-16
+  by method-log M-01.** Both figures came from an uncommitted ion-coupling PDE
+  model; only its printed output survives in `legacy/2025-original/`. The number
+  outlived the model that produced it. Kept here struck through rather than
+  deleted, per the archive rule — a closed question is evidence about how the
+  project closes questions.
 - **O3 — Is there any amplification at all?** The 3x factor is assumed
   everywhere and derived nowhere. The cheapest test in the repository is the
   paired-container experiment sketched at the end of
-  [`legacy/notes/2025-12-07_seed-expansion-session.md`](../legacy/notes/2025-12-07_seed-expansion-session.md)
+  [`legacy/2025-original/firmware__02_crop_response.md`](../legacy/2025-original/firmware__02_crop_response.md)
   ($25, two identical soil containers, one modulated): does the treated container
   collect measurably more dew than the control? Until that runs, ON/OFF plots
   should be read as illustrations of an assumption.
