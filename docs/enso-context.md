@@ -98,6 +98,70 @@ depends on the ratio of the two effects rather than on either magnitude.
 
 → Open question **O15**.
 
+## Reading the sources critically
+
+A checklist for anyone updating this page. Each item can change an anomaly
+number by more than the effect being reported.
+
+**1. Which baseline?** 1991–2020, 1951–1980 and pre-industrial give materially
+different anomaly magnitudes for the same ocean. A later baseline absorbs prior
+warming into "normal", so a *smaller* anomaly number may be a re-baselining
+rather than a weaker event. This is a candidate resolution of the +1.4 / +2.7
+conflict above: RONI (Relative Niño index) is explicitly re-baselined — it
+subtracts tropical-mean SST change to remove the background warming trend — so
+RONI and a raw Niño-3.4 anomaly are *different quantities* and should not be
+expected to agree. Candidate, not confirmed; it still needs the primary source.
+
+**2. Surface-only or full column?** A headline SST number excludes the
+subsurface entirely. In August 2026 the equatorial Pacific carried anomalies
+above **+8 °C at 50–150 m** between 150°W and 80°W, with some reports of
++11 °C — none of which appears in a surface figure.
+
+**3. What is being averaged over?** A regional anomaly is diluted toward nothing
+by global averaging. Ask what area the number covers before comparing two
+numbers.
+
+**4. "Not that bad" compared to what?** Against worst-case projections, plenty of
+results look reassuring. Against a pre-industrial baseline, far fewer do. For
+questions about whether a system's behaviour has changed in kind, the second
+comparison is the relevant one.
+
+### Displacement is not heat
+
+The most important distinction for subsurface anomalies, and the easiest to
+lose:
+
+A **fixed-depth temperature anomaly** across a sharp vertical gradient is
+largely a *displacement* signal. The equatorial thermocline spans roughly
+8–12 °C over a few tens of metres. A downwelling Kelvin wave depresses it, so a
+sensor at a fixed 100 m now samples water from above the thermocline where it
+previously sampled from below. The anomaly is approximately
+`vertical displacement × vertical gradient` — **a large fixed-depth anomaly can
+occur with no additional heat in the column at all.** It is a rearrangement.
+
+The budget-relevant quantity is **integrated upper-ocean heat content**
+(0–300 m), which is displacement-invariant. Australia's Bureau of Meteorology
+reported equatorial upper-ocean heat content in July 2026 as the highest for any
+month in its record back to 1979 — that *is* a budget statement, and it is a
+different claim from the +11 °C figure, resting on different evidence.
+
+The two questions separate cleanly:
+
+| Question | Diagnostic |
+|---|---|
+| How displaced is the thermocline? | Z20, depth of the 20 °C isotherm |
+| Has the heat budget changed? | integrated OHC 0–300 m |
+| Is mixing structurally suppressed? | stratification / buoyancy frequency N², as a trend rather than an event anomaly |
+
+If OHC stays elevated after Z20 relaxes, the budget changed. If both relax
+together, it was wave dynamics. That is the test that distinguishes "structural"
+from "temporary", and this project is not in a position to run it.
+
+**Provenance warning on the +11 °C figure specifically**: the >8 °C value and
+the BoM heat-content record come from better-attested reporting; the +11.1 °C
+figure traces to low-reliability secondary outlets. By this page's own
+criterion 1, that number should not be quoted without the primary source.
+
 ## Fog is not dew
 
 There is real published work on ENSO and fog:

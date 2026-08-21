@@ -878,6 +878,27 @@ Carried forward. Each names what would close it.
   either magnitude but has not been tested against real anomaly data. Closing it
   needs observed composite RH and cloud anomalies for a strong El Nino in at
   least one drought region.
+- **O20 — H11 assumes teleconnection stationarity, and that assumption is now
+  in question.** `06_enso_response.py` takes the *signs* of its regional RH and
+  cloud shifts from the documented historical teleconnection pattern, and
+  assumes a strong El Niño perturbs the atmosphere the way past strong El Niños
+  did. It contains no ocean at all — no thermocline, no subsurface, no
+  stratification — so it cannot represent a change in ENSO's vertical structure
+  even in principle.
+  That matters because the 2026 event carries subsurface anomalies above +8 °C
+  at 50–150 m and record upper-ocean heat content (BoM, since 1979). Whether
+  that is thermocline *displacement* by downwelling Kelvin waves — which
+  reverses — or a genuine change in the heat budget and mixing regime decides
+  whether historical composites still transfer. If ENSO's structure is
+  changing, borrowed teleconnection signs are exactly the wrong thing to build
+  on, and H11's conclusion inherits that risk.
+  Closing it needs the diagnostics in `enso-context.md`: does integrated
+  0–300 m heat content stay elevated after Z20 relaxes, and is stratification
+  trending beyond what the event explains? Neither is answerable from here.
+  **H11's direction is probably robust** — dew needs vapour, and a drier
+  atmosphere is a drier atmosphere by whichever route — but its regional
+  assignment of *which* places dry out is only as good as the stationarity
+  assumption.
 - **O16 — Does the anti-correlation hold outside ENSO?** H11 shows supply and
   need moving in opposite directions for ENSO-driven drought. Whether that
   generalises to drought driven by other mechanisms — a failed monsoon, a
