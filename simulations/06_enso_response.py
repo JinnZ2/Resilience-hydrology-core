@@ -120,7 +120,7 @@ BASELINE_WINDOW = {
 }
 
 # A collector built to the current guidance: season, siting, tilt, insulation,
-# no Peltier (docs/build-guide.md).
+# no Peltier (docs/build-dew.md).
 CONFIG = {
     'sky_view_factor': 0.95,
     'local_vapor_boost': 0.0,

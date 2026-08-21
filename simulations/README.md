@@ -251,3 +251,42 @@ this repository.
 Stronger evidence than anything else here, and not transferable to a build
 nobody in this project has made. See
 [`../docs/alternative-systems.md`](../docs/alternative-systems.md).
+
+### 08_sorbent_sizing.py
+
+Sizes the dry-air build: how much salt, how much bed area, how much solar
+aperture, roughly what it costs.
+
+```bash
+python 08_sorbent_sizing.py --rh 0.35 --target-l 1.0
+python 08_sorbent_sizing.py --compare-salts --rh 0.20
+python 08_sorbent_sizing.py --sweep
+```
+
+**Output**: a bill of materials for a target daily yield, or a salt comparison
+at your site's humidity.
+
+The salt choice is the design decision, because a hygroscopic salt only takes up
+water in bulk above its deliquescence humidity:
+
+| Pre-dawn RH | CaCl₂ (DRH 30%) | LiCl (DRH 11%) | Silica gel |
+|---|---|---|---|
+| 15% | 0.04 | 0.70 | 0.04 |
+| 30% | 0.91 | 1.17 | 0.15 |
+| 60% | 1.33 | 1.75 | 0.31 |
+
+(g water per g dry composite)
+
+Above ~30% RH use calcium chloride: cheap, food-grade, no lithium question.
+Below it CaCl₂ collapses — 44 kg of composite for 1 L/day at 15% RH instead of
+1.5 kg — and only LiCl or a MOF still works, which brings a drinking-water
+safety problem with it.
+
+Silica gel's isotherm is S-shaped rather than Langmuir. An earlier version of
+this file used the wrong shape and put silica gel at 0.23 g/g at 15% RH, ~5×
+the real value, making it look like a viable dry-air option. It is not one — but
+its lack of brine makes it the safest way to learn the cycle.
+
+⚠️ **Nobody in this project has built one of these.** Material properties are
+published; the cycle model is ours and unvalidated. Build guide and safety notes:
+[`../docs/build-sorbent.md`](../docs/build-sorbent.md).

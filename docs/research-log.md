@@ -318,7 +318,7 @@ round for what changed and why.)*
 1. **Tilt is the largest design lever and no build guide specifies it.** It
    trades drainage against sky view — steeper sheds droplets into the collector
    but sees less cold sky — giving a genuine interior optimum rather than a
-   bound. Neither [`build-guide.md`](build-guide.md) nor
+   bound. Neither [`build-dew.md`](build-dew.md) nor
    [`trailer-build.md`](trailer-build.md) mentions collector angle. → **O9**
 2. **The ecological variables are real levers.** Canopy openness
    (`sky_view_factor`) and upwind soil/plant moisture (`local_vapor_boost`)
@@ -567,7 +567,7 @@ therefore never tested.
 
 - **Source**: [`../README.md`](../README.md) framing ("During drought,
   conventional irrigation fails... this approach"), and
-  [`build-guide.md`](build-guide.md) title, from 2025-12-07 onward.
+  [`build-dew.md`](build-dew.md) title, from 2025-12-07 onward.
 - **Prediction**: conditions that define El Nino drought make dew formation
   easier, or at worst leave it unchanged. Drought skies are clear, and clear
   skies are what radiative cooling needs.
@@ -641,7 +641,7 @@ The assumption behind every design improvement this project has made. Rounds 2
 and 3 optimised tilt, siting, insulation and emissivity on the implicit belief
 that yield is a slope you can climb.
 
-- **Source**: implicit throughout [`build-guide.md`](build-guide.md) and Rounds
+- **Source**: implicit throughout [`build-dew.md`](build-dew.md) and Rounds
   2-3 of this log.
 - **Prediction**: as RH falls, modelled dew declines smoothly, so design
   improvements retain proportional value.
@@ -711,6 +711,85 @@ This is the only calibration against measured data anywhere in this repository,
 and it is worth recording that it moved against the more flattering number. Had
 it gone the other way it would have been just as publishable here, which is the
 only reason the direction is meaningful.
+
+---
+
+## Round 7 — 2026-08-21: two builds
+
+O18 asked which project this is: a dew collector for cool humid sites, or a
+dry-air harvester for the places drought actually happens. The answer chosen is
+**both, explicitly**, because the alternative is a repository that quietly serves
+one climate while its framing promises another.
+
+Three documents replace one:
+
+- [`build-guide.md`](build-guide.md) — a chooser. Asks for the site's pre-dawn
+  RH and routes to one of the two builds.
+- [`build-dew.md`](build-dew.md) — Build A, the existing passive collector,
+  now scoped to the conditions where it works.
+- [`build-sorbent.md`](build-sorbent.md) — Build B, new: salt and sunlight, for
+  air too dry for dew.
+
+Plus [`../simulations/08_sorbent_sizing.py`](../simulations/08_sorbent_sizing.py),
+which sizes Build B from published material properties.
+
+### H14 — "one hygroscopic salt will do for the dry-air build"
+
+The natural simplification when writing a second build guide, and worth testing
+before shipping it.
+
+- **Prediction**: pick the cheapest food-safe salt — calcium chloride — and it
+  covers the dry-air range the build exists to serve.
+- **Run**: `python simulations/08_sorbent_sizing.py --compare-salts --rh 0.15`
+  and `--sweep`
+- **Result**: uptake in g water per g dry composite —
+
+  | Pre-dawn RH | CaCl₂ (DRH 30%) | LiCl (DRH 11%) | Silica gel |
+  |---|---|---|---|
+  | 15% | 0.04 | 0.70 | 0.04 |
+  | 20% | 0.08 | 0.88 | 0.07 |
+  | 30% | 0.91 | 1.17 | 0.15 |
+  | 60% | 1.33 | 1.75 | 0.31 |
+
+  For 1 L/day at 15% RH: CaCl₂ needs **43.8 kg** of composite, LiCl needs 2.2 kg.
+
+- **Verdict**: **FALSIFIED.** A hygroscopic salt only takes up water in bulk
+  above its deliquescence humidity, and CaCl₂'s is ~30%. Below that its uptake
+  collapses — the same kind of wall dew has, moved further into dry air. **The
+  site's humidity picks the salt, and the salt decides whether it is a
+  drinking-water build**, because the salt that works below 30% RH is lithium
+  chloride, which is pharmacologically active and has no food-additive status.
+- **Consequence**: the build guide cannot give one recipe. It gives a humidity
+  threshold, a salt table, and a safety section that changes with the answer.
+  This is also why the published Atacama device that works at 11% RH uses
+  LiCl — that was not an arbitrary materials choice.
+
+### A modelling error caught by disbelief
+
+The first version of `08_sorbent_sizing.py` used a Langmuir isotherm for every
+sorbent and reported **silica gel at 0.23 g/g at 15% RH** — which made it look
+like a cheap, safe, non-deliquescent answer to dry air. That would have been an
+attractive finding and it was wrong by about 5x.
+
+Silica gel is a physisorbent with an S-shaped (Type IV/V) isotherm: uptake stays
+low until mid humidity and then rises. Langmuir has the wrong curvature at the
+low end, which is exactly the end that matters here. Corrected to a sigmoidal
+form anchored to the same reference point, silica gel gives 0.04 g/g at 15% RH.
+
+Nothing flagged this. It was caught by the number looking too convenient, and
+checking it against what silica gel is known to do. Recorded because "the result
+was suspiciously helpful" is a weak detector and the only one that fired.
+
+### Status of Build B
+
+**Nobody in this project has built one.** The chemistry is well established and
+widely reproduced; this particular build has never been made or measured here.
+The guide says so at the top rather than in a footnote.
+
+That makes Build B the largest open opportunity in the repository: the first
+person to build one and weigh the bed before and after a night will produce
+better evidence than anything else here — a direct measurement of uptake in
+g/g, which is the number the whole design turns on. → **O19**
 
 ---
 
@@ -821,7 +900,18 @@ Carried forward. Each names what would close it.
   system on the strength of this repository, those figures need reading at
   source, and the cost and lifetime of the sorbent — neither of which is
   modelled — need adding.
-- **O18 — Which project is this?** H12 shows dew is a cool-humid-night
+- ~~**O18 — Which project is this?**~~ **CLOSED 2026-08-21, Round 7.** Both,
+  explicitly: `build-dew.md` for cool humid sites, `build-sorbent.md` for hot dry
+  ones, and `build-guide.md` as a chooser keyed to pre-dawn humidity. Kept struck
+  through rather than deleted — the question was real and the answer was a
+  decision, not a discovery.
+- **O19 — Build B has never been built.** Its material properties are published,
+  its cycle model is ours and unvalidated, and the gap between them is a weekend
+  of work for anyone with $8 of calcium chloride. The single most valuable
+  measurement: weigh the bed before and after a night, giving uptake in g/g
+  directly. That one number would test the whole sizing model, and this project
+  currently has no way to check it.
+- **O18 (original text, for the record) — Which project is this?** H12 shows dew is a cool-humid-night
   mechanism and H11 shows drought is hot and dry. Those are two different
   deployments with two different technologies, and the repository currently
   implies it serves both. It should decide: a passive dew collector for cool

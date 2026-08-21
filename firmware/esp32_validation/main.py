@@ -25,7 +25,7 @@ This firmware adds them:
                                    notebook stops" into a nightly series
 
 Together these cost about $23 and roughly four hours. See
-docs/build-guide.md, "The measurement kit".
+docs/build-guide.md, "Both builds want the same instruments".
 
 RECORD THESE TWO BY HAND, ONCE
 

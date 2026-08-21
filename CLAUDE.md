@@ -34,6 +34,8 @@ simulations/          Python models (numpy/matplotlib/scipy)
                            drying-vs-clearing channels separated
   07_alternative_systems.py  Mechanism comparison for dry air: dew vs active
                            condensation vs sorption, with the feasibility walls
+  08_sorbent_sizing.py     Sizes the sorbent build: salt choice, bed area,
+                           solar aperture, cost
 firmware/             MicroPython code for ESP32 hardware nodes
   esp32_basic/          Basic temperature logger (DS18B20 sensors)
 docs/                 Documentation, build guides, research notes
@@ -42,7 +44,9 @@ docs/                 Documentation, build guides, research notes
                         the method log (H-nn entries, O-nn open questions)
   enso-context.md       ENSO state, sources, and the drought-premise problem
   alternative-systems.md  What works when air is too dry for dew (sorption)
-  build-guide.md        Hardware builds by budget ($50-$2000)
+  build-guide.md        Chooser: which of the two builds suits a site
+  build-dew.md          Build A - passive dew, cool humid sites
+  build-sorbent.md      Build B - sorbent harvester, hot dry sites
   trailer-build.md      Real-world trailer dew collector results
   atmospheric-seed-theory.md  Research notes on seed expansion physics
 tools/                Repository self-checks
@@ -64,7 +68,7 @@ legacy/               Superseded files, frozen — the precedence record
 
 - Python files use snake_case for functions, variables, and file names
 - Classes use PascalCase
-- Simulation files are numbered: `01_` through `06_`
+- Simulation files are numbered: `01_` through `08_`
 - Units: mm/day for water output, Kelvin for temperatures in code, Celsius in display
 - Climate presets: arid, semi_arid, mediterranean, tropical_dry
 
@@ -112,6 +116,7 @@ python simulations/04_variable_search.py --condensing-only
 python simulations/05_transition_paths.py
 python simulations/06_enso_response.py --all-regions --decompose
 python simulations/07_alternative_systems.py --sweep --budget-check
+python simulations/08_sorbent_sizing.py --compare-salts
 
 Numbered filenames start with a digit, so they cannot be imported normally.
 `05_transition_paths.py`, `06_enso_response.py` and `07_alternative_systems.py`
@@ -153,10 +158,10 @@ via importlib; follow that pattern if another file needs to reuse a model.
   depression exceeds achievable radiative cooling, yield is exactly zero, not
   small. The wall sits near 70% RH at 15 C and near 90% at 32 C. Design
   improvements multiply zero below it.
-- **Two regimes, not one (O18).** Dew suits cool humid nights; severe drought is
-  hot and dry and needs sorption, which works to ~11% RH on solar heat. The repo
-  has not yet decided which project it is. Do not extend the dew build guide as
-  if it covered both.
+- **Two builds, resolved (O18).** Dew suits cool humid nights (`build-dew.md`);
+  severe drought is hot and dry and needs sorption (`build-sorbent.md`), which
+  works to ~11% RH on solar heat. `build-guide.md` is the chooser. Do not extend
+  either guide as if it covered both regimes.
 - **The drought premise is falsified for ENSO drought (H11).** Dew needs humid
   air; El Nino droughts are dry-air droughts. Modelled yield falls 68-85% in the
   regions a strong El Nino puts at risk. Do not describe this system as drought

@@ -11,7 +11,10 @@
 - **[alternative-systems.md](alternative-systems.md)** - What to build when the
   air is too dry for dew. Sorption, active condensation, and where each becomes
   possible.
-- **[build-guide.md](build-guide.md)** - Hardware builds by budget ($50-$2000)
+- **[build-guide.md](build-guide.md)** - **Which build?** Two paths, chosen by
+  your site's pre-dawn humidity
+- **[build-dew.md](build-dew.md)** - Build A: passive dew collector, cool humid sites
+- **[build-sorbent.md](build-sorbent.md)** - Build B: sorbent harvester, hot dry sites
 - **[trailer-build.md](trailer-build.md)** - Real-world trailer dew collector with results
 - **[atmospheric-seed-theory.md](atmospheric-seed-theory.md)** - Research notes on seed expansion physics
 

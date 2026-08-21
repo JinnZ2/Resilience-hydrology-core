@@ -44,6 +44,7 @@ Read this before quoting any number from this repository.
 | Drought premise | **Falsified for ENSO drought** (H11) — see above |
 | Dew's operating range | Cool humid nights only; a wall below it (H12) |
 | Dry-air alternative | Sorption, from published devices — not built here (H13) |
+| Build paths | **Two**: dew for cool humid, sorbent for hot dry |
 
 Modelled output, `simulations/01_basic_dew.py`:
 
@@ -105,6 +106,7 @@ being right about numbers we invented.
 simulations/       Python models (numpy/matplotlib/scipy)
   01-03            original models, with their known defects documented
   04, 05, 06, 07   energy-balance search, transitions, ENSO, alternatives
+  08               sorbent build sizing
 firmware/          MicroPython for ESP32 sensor nodes
   esp32_basic/     temperature only
   esp32_validation/ adds surface temp, humidity, volume — use this one
@@ -124,6 +126,7 @@ python simulations/04_variable_search.py --condensing-only
 python simulations/05_transition_paths.py
 python simulations/06_enso_response.py --all-regions --decompose
 python simulations/07_alternative_systems.py --sweep --budget-check
+python simulations/08_sorbent_sizing.py --compare-salts --rh 0.25
 ```
 
 See [`simulations/README.md`](simulations/README.md) for what each model does and
@@ -135,11 +138,19 @@ where each one is known to be wrong.
 `docs/method-log.md`. The second file is the more useful of the two: it says
 which parts of the first are load-bearing and which are placeholders.
 
-**Build hardware** — `docs/build-guide.md` for builds by budget,
-`docs/trailer-build.md` for a real build with its failures recorded, and
-`firmware/esp32_basic/` for the sensor node. Roughly $45 for the basic build.
-Build in the order the guide gives: season, siting, tilt. The order is the
-finding, not a formality.
+**Build hardware** — start at [`docs/build-guide.md`](docs/build-guide.md),
+which asks one question (your site's pre-dawn humidity) and routes you to one of
+two builds:
+
+- **[Build A — dew collector](docs/build-dew.md)** for cool humid nights. Free,
+  passive, no consumables. Build in the order the guide gives — season, siting,
+  tilt — because the order is the finding, not a formality.
+- **[Build B — sorbent harvester](docs/build-sorbent.md)** for hot or dry sites,
+  where dew yields exactly zero. Salt and sunlight, works down to ~11% RH,
+  ~$8–45. Nobody in this project has built one yet; if you do, you will be the
+  first and your numbers will be the best evidence here.
+
+`docs/trailer-build.md` records a real build with its failures.
 
 **Make your build testable** — `firmware/esp32_validation/` adds collector
 surface temperature, humidity, and nightly volume for about $23. The trailer
