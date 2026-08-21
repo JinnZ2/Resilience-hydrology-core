@@ -103,3 +103,190 @@ prints a term breakdown, per-byte sensitivity, and explicit warnings instead.
 
 Kept as scaffolding for the seed decode/optimise loop. Do not quote its output as
 tuned configurations.
+
+### 04_variable_search.py
+
+Searches a constrained variable space for the *ranges* that improve yield, and
+ranks variables — including ecological ones — by how much they actually move the
+outcome.
+
+```bash
+python 04_variable_search.py                              # semi-arid, 4000 samples
+python 04_variable_search.py --list-variables              # the constraint table
+python 04_variable_search.py --condensing-only             # isolate design levers
+python 04_variable_search.py --climate arid --samples 12000 --condensing-only
+python 04_variable_search.py --fix tilt_deg=30 --energy-budget 10
+python 04_variable_search.py --climate repo_daytime_rh     # reproduces the H7 null result
+```
+
+**Output**: a five-part report — sensitivity ranking, optimal ranges, interior
+optima, ecological levers, and measurement priorities — plus a PNG.
+
+Unlike the other three files this one uses a surface energy balance (radiative
+loss + active cooling = convective gain + latent release + conduction) rather
+than a linear formula, because the ecological variables need somewhere physical
+to act. Coefficients are tagged `[STANDARD]` or `[ASSUMED]` in the source.
+
+What it reports, and why each part exists:
+
+- **Sensitivity** — first-order index `Var(E[Y|X])/Var(Y)`, which catches
+  variables with a peak in the middle that a correlation coefficient misses.
+- **Optimal ranges** — where the top 10% of outcomes sit, with a `narrow` score
+  saying whether the variable is actually selective.
+- **Corner-solution detection** — flags any "optimum" that is really just a
+  bound. This exists because `03_seed_optimization.py` shipped exactly that
+  failure undetected (research log, H5).
+- **Interior optima** — the variables with a genuine best range. Trust the
+  range; the peak *point* is the noisiest number in the report.
+- **Measurement priorities** — high-leverage variables nobody has measured,
+  which is the actionable form of O1.
+
+Main results so far are in the research log, Round 2. The short version: tilt is
+the biggest design lever and no build guide specifies it; canopy openness and
+upwind soil moisture outrank every hardware variable except tilt; and active
+cooling within the field build's energy budget is worth 1.11x, not 3x.
+
+⚠️ Everything it prints is a property of the model, which has never been
+compared against a field measurement. The rankings are hypotheses about where to
+look, not findings about dew.
+
+### 05_transition_paths.py
+
+Takes an already-built collector and returns the cheapest ordered set of changes
+to improve it — with costs, hours, and who has to act.
+
+```bash
+python 05_transition_paths.py                              # the actual deployment site
+python 05_transition_paths.py --list-mods                  # the modification catalogue
+python 05_transition_paths.py --site semi_arid_summer
+python 05_transition_paths.py --budget 0 10 25 50 100
+```
+
+**Output**: no-regret moves, information moves, a staged plan by budget tranche,
+an ordering-effects table, a breakdown by actor, and an explicit "what not to
+do".
+
+Every modification is scored across a Monte Carlo varying **both the weather and
+this project's own `[ASSUMED]` coefficients**, so a recommendation that survives
+is one that does not depend on us being right about the numbers we invented.
+Modifications are re-scored after each step is applied, so interactions are
+handled rather than assumed additive.
+
+Three results worth knowing:
+
+- **The first stage costs −$3.** Removing the Peltier pays for the bracket, the
+  foam, and the mulch.
+- **Ordering beats the parts list.** Angling the collector is worth +0.1 mL/night
+  on its own and +10.9 after the free season and siting decisions. A guide that
+  lists parts without the ordering sells upgrades that appear not to work.
+- **Information outranks hardware.** The entire measurement kit is $23 and about
+  four hours, and it is what makes every other number in this repository
+  checkable.
+
+Details in the research log, Round 3.
+
+### 06_enso_response.py
+
+What a strong El Niño does to modelled dew yield, region by region, with the
+competing channels separated.
+
+```bash
+python 06_enso_response.py --all-regions --decompose
+python 06_enso_response.py --region southern_africa --samples 4000
+python 06_enso_response.py --list-regions
+```
+
+**Output**: yield change per region, and a decomposition into drying, clearing
+and warming.
+
+El Niño drought does two opposite things to radiative dew — it dries the air
+(less vapour to condense) and clears the sky (stronger radiative cooling). This
+is the first question in the project that *required* the energy balance:
+`01_basic_dew.py` has no cloud term at all, so to it a drought is just a smaller
+RH number.
+
+Result: **drying wins by 1.5–2x in every drought region tested.** Modelled yield
+falls 68–85% across Australia, southern Africa, South-East Asia and Central
+America, and rises 61% in the southern US, which a strong El Niño makes wetter.
+Clearing is a real benefit, just an outmatched one.
+
+The uncomfortable conclusion is in the research log as H11: this system produces
+least exactly where and when it is most needed.
+
+⚠️ The perturbation magnitudes are `[ASSUMED]` — only their signs are sourced
+(see [`../docs/enso-context.md`](../docs/enso-context.md), which also records why
+the primary NOAA sources could not be retrieved). Read the sign and the ranking,
+not the absolute mL.
+
+### 07_alternative_systems.py
+
+Compares water-harvesting mechanisms for air too dry for dew: passive radiative
+dew, active condensation, and sorption.
+
+```bash
+python 07_alternative_systems.py --sweep --budget-check
+python 07_alternative_systems.py --rh 0.25 --t-air 305
+```
+
+**Output**: feasibility and energy cost per mechanism, a humidity sweep showing
+where each switches on, and what the field energy budget affords.
+
+Written after H11 falsified the project's drought premise. Two findings:
+
+- **Dew is a wall, not a slope (H12).** Below the point where dew-point
+  depression exceeds achievable radiative cooling, yield is exactly zero. The
+  wall sits near 70% RH at 15 °C and near 90% at 32 °C. Every design
+  improvement in Rounds 2–3 multiplies zero below it.
+- **Sorption has no such wall (H13).** Published devices harvest at 11–20% RH
+  for 1–3 kWh/L of *heat*. At 25% RH a condenser must chill 734 kg of air per kg
+  of water; a sorbent does not need saturation at all. And because sorption wants
+  heat rather than work, the clear drought skies that cannot save dew do supply
+  sun — a 1 m² thermal collector beats the $45 build's electrical budget ~20×.
+
+The condensation model is anchored to a published measurement (1.02 kWh/L at
+30 °C/62% RH, implying COP 1.73) — the only calibration against measured data in
+this repository.
+
+⚠️ Sorption figures are other groups' measurements of other groups' hardware.
+Stronger evidence than anything else here, and not transferable to a build
+nobody in this project has made. See
+[`../docs/alternative-systems.md`](../docs/alternative-systems.md).
+
+### 08_sorbent_sizing.py
+
+Sizes the dry-air build: how much salt, how much bed area, how much solar
+aperture, roughly what it costs.
+
+```bash
+python 08_sorbent_sizing.py --rh 0.35 --target-l 1.0
+python 08_sorbent_sizing.py --compare-salts --rh 0.20
+python 08_sorbent_sizing.py --sweep
+```
+
+**Output**: a bill of materials for a target daily yield, or a salt comparison
+at your site's humidity.
+
+The salt choice is the design decision, because a hygroscopic salt only takes up
+water in bulk above its deliquescence humidity:
+
+| Pre-dawn RH | CaCl₂ (DRH 30%) | LiCl (DRH 11%) | Silica gel |
+|---|---|---|---|
+| 15% | 0.04 | 0.70 | 0.04 |
+| 30% | 0.91 | 1.17 | 0.15 |
+| 60% | 1.33 | 1.75 | 0.31 |
+
+(g water per g dry composite)
+
+Above ~30% RH use calcium chloride: cheap, food-grade, no lithium question.
+Below it CaCl₂ collapses — 44 kg of composite for 1 L/day at 15% RH instead of
+1.5 kg — and only LiCl or a MOF still works, which brings a drinking-water
+safety problem with it.
+
+Silica gel's isotherm is S-shaped rather than Langmuir. An earlier version of
+this file used the wrong shape and put silica gel at 0.23 g/g at 15% RH, ~5×
+the real value, making it look like a viable dry-air option. It is not one — but
+its lack of brine makes it the safest way to learn the cycle.
+
+⚠️ **Nobody in this project has built one of these.** Material properties are
+published; the cycle model is ours and unvalidated. Build guide and safety notes:
+[`../docs/build-sorbent.md`](../docs/build-sorbent.md).

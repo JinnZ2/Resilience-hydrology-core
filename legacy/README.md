@@ -27,10 +27,18 @@ original directory (`firmware__main.py` was `firmware/main.py`).
 | `firmware__01_basic_dew_simulation.py` | `firmware/01_basic_dew_simulation.py` | `simulations/01_basic_dew.py` | Simulation misfiled under firmware, wrapped in markdown |
 | `firmware__01_basic_dew_2simulation.py` | `firmware/01_basic_dew_2simulation.py` | `simulations/01_basic_dew.py` | Direct ancestor of the current dew model |
 | `simulations__01_basic_dew_simulation.py` | `simulations/01_basic_dew_simulation.py` | `simulations/01_basic_dew.py` | Byte-identical duplicate of the `_2simulation` file |
+| `BUILD-README.md` | `BUILD-README.md` | `docs/build-guide.md` | Archived 2026-08-15. Was a pure rename until the guide was restructured to lead with operating season and siting; it also lists the Peltier as a component, which the current guide tells you to remove (H8, Round 3) |
+| `trailer-build.md` | `trailer-build.md` | `docs/trailer-build.md` | Archived 2026-08-15. Holds the withdrawn "Average: 95ml/night" figure (M-07/H4) and the original next-iteration list — frost heater, bigger panel — both of which existed to keep the Peltier running |
+| `docs__README.md` | `docs/README.md` | `docs/README.md` | The original documentation index |
 
-Not copied here: `BUILD-README.md`, `trailer-build.md` and `Requirements.txt`
-were pure renames (100% content match) into `docs/` and the repo root. Nothing
-was lost, so there is nothing to preserve.
+`Requirements.txt` is not copied here: it was a pure rename to `requirements.txt`
+with 100% content match, so nothing was lost.
+
+The last three rows were added on 2026-08-15. When this table was first written
+those files were pure renames with nothing to preserve — which was true at the
+time. Rewriting the live versions is what created something to preserve. That is
+the rule working: the trigger for archiving is a claim changing, not a file
+moving.
 
 ## What the legacy files establish
 
@@ -67,6 +75,7 @@ stated correspondence. See M-08.
 
 1. Move it under a dated directory, flattening the path with `__`.
 2. Add a row to the table above: what it was, what supersedes it, why it's kept.
-3. If it carried a claim, open a `docs/method-log.md` entry before the claim
+3. If it carried a claim, open an entry in `docs/method-log.md` (or
+   `docs/research-log.md`, whichever round you are working in) before the claim
    disappears from the live docs.
 4. Point every remaining reference at the new location.

@@ -27,6 +27,20 @@ MicroPython code for ESP32 microcontrollers.
 > collision. **Unverified on hardware** (GPIO15 is an ESP32 strapping pin, must
 > be high at boot). Confirm and record in `docs/method-log.md` M-06.
 
+## ESP32 Validation Logger
+
+- **Language**: MicroPython
+- **Features**: Adds collector surface temperature, humidity, and collected
+  volume - the three quantities the models predict and the basic node cannot
+  measure. Takes collector area and tilt as site constants you record once.
+- **Hardware**: ESP32 + 2x DS18B20 + SHT31 + tipping-bucket gauge
+- **Cost**: ~$23 on top of a basic node
+- **Code**: `esp32_validation/main.py`
+
+Use this one if you want your data to be able to check anything. Closing the
+model-vs-measurement gap (method-log M-07, research-log O1) needs these sensors.
+See `esp32_validation/README.md`.
+
 ## Quick Start
 
 ```bash
