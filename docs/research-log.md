@@ -628,6 +628,92 @@ about the sign is a reason to measure, not to borrow.
 
 ---
 
+## Round 6 — 2026-08-21: alternatives for dry-air drought
+
+H11 falsified the premise. This round asks the follow-up question rather than
+defending it: if radiative dew fails in dry air, what works instead?
+[`../simulations/07_alternative_systems.py`](../simulations/07_alternative_systems.py)
+compares mechanisms on a common physical basis.
+
+### H12 — "dew yield falls off gradually as air gets drier, so a better collector helps"
+
+The assumption behind every design improvement this project has made. Rounds 2
+and 3 optimised tilt, siting, insulation and emissivity on the implicit belief
+that yield is a slope you can climb.
+
+- **Source**: implicit throughout [`build-guide.md`](build-guide.md) and Rounds
+  2-3 of this log.
+- **Prediction**: as RH falls, modelled dew declines smoothly, so design
+  improvements retain proportional value.
+- **Run**: `python simulations/07_alternative_systems.py --sweep`
+- **Result**: mL/m² per night, by air temperature:
+
+  | RH | 15 °C | 22 °C | 32 °C |
+  |---|---|---|---|
+  | ≤50% | 0 | 0 | 0 |
+  | 70% | 8 | 1 | 0 |
+  | 80% | 59 | 17 | 0 |
+  | 90% | 179 | 130 | 6 |
+
+- **Verdict**: **FALSIFIED. It is a wall, not a slope.** Below the point where
+  dew-point depression exceeds achievable radiative cooling (3-9 K), yield is
+  not small — it is exactly zero. Tilt, emissivity and insulation multiply zero.
+  The wall sits near 70% RH at 15 °C and near 90% at 32 °C.
+- **Consequence for earlier rounds**: the Round 2-3 design findings are not
+  wrong, but their scope is narrower than stated. They optimise a mechanism that
+  only operates on cool humid nights. `05_transition_paths.py` already reaches
+  this conclusion from the other direction — its top recommendation is to change
+  *when* you run, not what you build.
+- **Refines H11**: the anti-correlation is worst in *hot* drought. Cool coastal
+  and highland sites with humid nights remain genuinely good for dew. The
+  project has two regimes and has never said which it serves. → **O18**
+
+### H13 — "there is no way to harvest water from severely dry air at small scale"
+
+The pessimistic reading of H11, and worth testing before accepting it.
+
+- **Prediction**: at 20-30% RH, any mechanism either fails outright or needs
+  more energy than a small off-grid build can supply.
+- **Run**: `python simulations/07_alternative_systems.py --sweep --budget-check`
+- **Result** at 32 °C, 25% RH:
+
+  | Mechanism | Feasible | mL/m²/day | Energy |
+  |---|---|---|---|
+  | Passive dew | no | 0 | free |
+  | Active condensation | yes | 317 | 3.41 kWh/L electrical |
+  | Sorption + solar heat | yes | 240-720 | 1-3 kWh/L thermal |
+
+- **Verdict**: **NOT SUPPORTED — sorption works where condensation cannot.**
+  Published devices harvest at 11-20% RH, below any condensation threshold,
+  because a sorbent does not require the air to reach saturation. At 25% RH a
+  condenser must chill **734 kg of air per kg of water**; that ratio, not any
+  equipment defect, is why cooling fails in dry air.
+- **The inversion**: sorption needs *heat*, and drought regions are sunny. A 1 m²
+  solar thermal collector at 12% efficiency delivers 0.72 kWh/day against the
+  $45 build's 0.036 kWh — roughly **20x**, in the form the mechanism wants. The
+  same clear skies that cannot save dew, because they supply no vapour, do supply
+  sun. **H11's anti-correlation reverses for this mechanism.**
+- **Thermodynamic floor**: 0.054 kWh/L at these conditions. Real devices sit
+  20-60x above it. Nothing here is limited by physics, only by engineering — the
+  one encouraging fact in the round.
+- **Status of the evidence**: the sorption figures are *other groups'
+  measurements of other groups' hardware*. That makes them stronger than
+  anything else in this repository, where every number is an unvalidated model,
+  and simultaneously not transferable to a build nobody here has made. → **O17**
+
+### A calibration that went the unhelpful way
+
+The condensation model was anchored to a published measurement — 1.02 kWh/L at
+30 °C/62% RH — implying an end-to-end COP of **1.73**, not the 2.5 first
+assumed. The correction made condensation look *worse* by about 1.4x.
+
+This is the only calibration against measured data anywhere in this repository,
+and it is worth recording that it moved against the more flattering number. Had
+it gone the other way it would have been just as publishable here, which is the
+only reason the direction is meaningful.
+
+---
+
 ## Open questions
 
 Carried forward. Each names what would close it.
@@ -719,6 +805,29 @@ Carried forward. Each names what would close it.
   blocking high, long-term aridification — is unknown and matters more than the
   ENSO case, because it decides whether the project's premise is wrong in
   general or only for this one driver.
+- **O17 — Sorption numbers are unverified second-hand, and two of them
+  disagree by 10x.** The energy route (1 m² solar thermal ÷ 1-3 kWh/L) gives
+  240-720 mL/m²/day; published devices report 5,500 mL/m²/day at low humidity.
+  Either those devices use a solar aperture larger than their sorbent area, run
+  multiple cycles daily, or the energy figure does not describe them.
+  `07_alternative_systems.py` reports the smaller first-principles number and
+  flags the gap in its own output. The H13 conclusion survives either way, which
+  is why the gap does not block it — but no sorbent should be sized from this
+  repository until it is resolved. All these figures come from search summaries,
+  not the papers themselves. The performance and
+  energy figures in `07_alternative_systems.py` come from search summaries of
+  published work, not from the papers themselves (this environment could not
+  fetch them; see `alternative-systems.md`). Before anyone builds a sorbent
+  system on the strength of this repository, those figures need reading at
+  source, and the cost and lifetime of the sorbent — neither of which is
+  modelled — need adding.
+- **O18 — Which project is this?** H12 shows dew is a cool-humid-night
+  mechanism and H11 shows drought is hot and dry. Those are two different
+  deployments with two different technologies, and the repository currently
+  implies it serves both. It should decide: a passive dew collector for cool
+  humid sites, a sorption system for hot dry ones, or an explicit statement that
+  it covers both with separate build paths. Everything in `build-guide.md`
+  currently assumes the first while the framing promises the second.
 - **O14 — The audit only checks form, not truth.** `tools/log_audit.py` verifies
   that an entry cites a command and that the command exits zero. It does not
   check that the command produces the numbers the entry claims. An entry could

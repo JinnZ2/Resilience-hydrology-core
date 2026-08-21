@@ -32,6 +32,8 @@ simulations/          Python models (numpy/matplotlib/scipy)
                            better one, scored under our own uncertainty
   06_enso_response.py      Dew yield under a strong El Nino, by region, with the
                            drying-vs-clearing channels separated
+  07_alternative_systems.py  Mechanism comparison for dry air: dew vs active
+                           condensation vs sorption, with the feasibility walls
 firmware/             MicroPython code for ESP32 hardware nodes
   esp32_basic/          Basic temperature logger (DS18B20 sensors)
 docs/                 Documentation, build guides, research notes
@@ -39,6 +41,7 @@ docs/                 Documentation, build guides, research notes
   research-log.md       Second falsification record; rounds 2-5 continue past
                         the method log (H-nn entries, O-nn open questions)
   enso-context.md       ENSO state, sources, and the drought-premise problem
+  alternative-systems.md  What works when air is too dry for dew (sorption)
   build-guide.md        Hardware builds by budget ($50-$2000)
   trailer-build.md      Real-world trailer dew collector results
   atmospheric-seed-theory.md  Research notes on seed expansion physics
@@ -108,9 +111,11 @@ python simulations/03_seed_optimization.py   # reports its own degeneracy (M-03)
 python simulations/04_variable_search.py --condensing-only
 python simulations/05_transition_paths.py
 python simulations/06_enso_response.py --all-regions --decompose
+python simulations/07_alternative_systems.py --sweep --budget-check
 
 Numbered filenames start with a digit, so they cannot be imported normally.
-`05_transition_paths.py` and `06_enso_response.py` load `04_variable_search.py`
+`05_transition_paths.py`, `06_enso_response.py` and `07_alternative_systems.py`
+load `04_variable_search.py`
 via importlib; follow that pattern if another file needs to reuse a model.
 ```
 
@@ -144,6 +149,14 @@ via importlib; follow that pattern if another file needs to reuse a model.
   budget it delivers ~6% of the radiative cooling the surface already does for
   free — worth ~1.11x against a claimed 3x (research-log H8). Removing it
   recovers $15 and funds the changes that do work.
+- **Dew is a wall, not a slope (H12).** Below the point where dew-point
+  depression exceeds achievable radiative cooling, yield is exactly zero, not
+  small. The wall sits near 70% RH at 15 C and near 90% at 32 C. Design
+  improvements multiply zero below it.
+- **Two regimes, not one (O18).** Dew suits cool humid nights; severe drought is
+  hot and dry and needs sorption, which works to ~11% RH on solar heat. The repo
+  has not yet decided which project it is. Do not extend the dew build guide as
+  if it covered both.
 - **The drought premise is falsified for ENSO drought (H11).** Dew needs humid
   air; El Nino droughts are dry-air droughts. Modelled yield falls 68-85% in the
   regions a strong El Nino puts at risk. Do not describe this system as drought

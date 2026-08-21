@@ -9,6 +9,32 @@ Practical, buildable water harvesting systems for drought conditions.
 > [`legacy/2025-original/BUILD-README.md`](../legacy/2025-original/BUILD-README.md);
 > what changed and why is in [`research-log.md`](research-log.md), Round 3.
 
+## First: is dew the right mechanism for your site?
+
+**Check this before spending anything.** Dew is not a mechanism that works
+poorly in dry air — it stops entirely. Below the point where the dew-point
+depression exceeds the 3–9 K that radiative cooling can deliver, the yield is
+exactly zero, and nothing in this guide changes that.
+
+Modelled yield, mL/m² per night, by **pre-dawn** air temperature and humidity:
+
+| RH | 15 °C | 22 °C | 32 °C |
+|---|---|---|---|
+| ≤50% | 0 | 0 | 0 |
+| 70% | 8 | 1 | 0 |
+| 80% | 59 | 17 | 0 |
+| 90% | 179 | 130 | 6 |
+
+- **Cool nights above ~70% RH** → build what this guide describes.
+- **Hot nights, or below ~60% RH** → this guide will not produce water for you.
+  See [`alternative-systems.md`](alternative-systems.md): sorption harvests down
+  to about 11% RH, which is where severe drought actually sits.
+
+Note that these are *pre-dawn* values, which are far higher than the daytime
+humidity at the same site. If you do not know your pre-dawn RH, that is the
+first thing to measure — a $6 sensor settles it
+([`firmware/esp32_validation/`](../firmware/esp32_validation/)).
+
 ## Build in this order
 
 The order is the finding. Steps 1 and 2 cost nothing and unlock everything after

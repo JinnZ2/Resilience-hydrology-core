@@ -21,6 +21,12 @@ formation using temperature, pH, and light gradients that exist everywhere.
 > by 1.5–2x. **Supply and need move in opposite directions.**
 > See [`docs/research-log.md`](docs/research-log.md) H11 and
 > [`docs/enso-context.md`](docs/enso-context.md).
+>
+> **And it is a wall, not a slope (H12).** Below roughly 70% pre-dawn RH at
+> 15 °C — or 90% at 32 °C — dew yield is *exactly zero*, not merely low. Better
+> tilt and coatings multiply zero. What works in dry air is **sorption**, which
+> harvests down to about 11% RH on solar heat:
+> [`docs/alternative-systems.md`](docs/alternative-systems.md).
 
 ## Where this actually stands
 
@@ -36,6 +42,8 @@ Read this before quoting any number from this repository.
 | Energy-balance model | Added round 2; structurally sound, still unvalidated |
 | Transition analysis | First stage costs −$3 and works today |
 | Drought premise | **Falsified for ENSO drought** (H11) — see above |
+| Dew's operating range | Cool humid nights only; a wall below it (H12) |
+| Dry-air alternative | Sorption, from published devices — not built here (H13) |
 
 Modelled output, `simulations/01_basic_dew.py`:
 
@@ -96,7 +104,7 @@ being right about numbers we invented.
 ```
 simulations/       Python models (numpy/matplotlib/scipy)
   01-03            original models, with their known defects documented
-  04, 05, 06       energy-balance search, transition analysis, ENSO response
+  04, 05, 06, 07   energy-balance search, transitions, ENSO, alternatives
 firmware/          MicroPython for ESP32 sensor nodes
   esp32_basic/     temperature only
   esp32_validation/ adds surface temp, humidity, volume — use this one
@@ -115,6 +123,7 @@ python simulations/03_seed_optimization.py
 python simulations/04_variable_search.py --condensing-only
 python simulations/05_transition_paths.py
 python simulations/06_enso_response.py --all-regions --decompose
+python simulations/07_alternative_systems.py --sweep --budget-check
 ```
 
 See [`simulations/README.md`](simulations/README.md) for what each model does and

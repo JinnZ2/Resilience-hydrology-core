@@ -217,3 +217,37 @@ least exactly where and when it is most needed.
 (see [`../docs/enso-context.md`](../docs/enso-context.md), which also records why
 the primary NOAA sources could not be retrieved). Read the sign and the ranking,
 not the absolute mL.
+
+### 07_alternative_systems.py
+
+Compares water-harvesting mechanisms for air too dry for dew: passive radiative
+dew, active condensation, and sorption.
+
+```bash
+python 07_alternative_systems.py --sweep --budget-check
+python 07_alternative_systems.py --rh 0.25 --t-air 305
+```
+
+**Output**: feasibility and energy cost per mechanism, a humidity sweep showing
+where each switches on, and what the field energy budget affords.
+
+Written after H11 falsified the project's drought premise. Two findings:
+
+- **Dew is a wall, not a slope (H12).** Below the point where dew-point
+  depression exceeds achievable radiative cooling, yield is exactly zero. The
+  wall sits near 70% RH at 15 °C and near 90% at 32 °C. Every design
+  improvement in Rounds 2–3 multiplies zero below it.
+- **Sorption has no such wall (H13).** Published devices harvest at 11–20% RH
+  for 1–3 kWh/L of *heat*. At 25% RH a condenser must chill 734 kg of air per kg
+  of water; a sorbent does not need saturation at all. And because sorption wants
+  heat rather than work, the clear drought skies that cannot save dew do supply
+  sun — a 1 m² thermal collector beats the $45 build's electrical budget ~20×.
+
+The condensation model is anchored to a published measurement (1.02 kWh/L at
+30 °C/62% RH, implying COP 1.73) — the only calibration against measured data in
+this repository.
+
+⚠️ Sorption figures are other groups' measurements of other groups' hardware.
+Stronger evidence than anything else here, and not transferable to a build
+nobody in this project has made. See
+[`../docs/alternative-systems.md`](../docs/alternative-systems.md).

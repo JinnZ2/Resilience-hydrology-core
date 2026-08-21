@@ -8,6 +8,9 @@
   model-vs-measurement comparison
 - **[enso-context.md](enso-context.md)** - What El Niño does to dew yield, and
   why the drought premise needs qualifying. Time-sensitive; re-check the state.
+- **[alternative-systems.md](alternative-systems.md)** - What to build when the
+  air is too dry for dew. Sorption, active condensation, and where each becomes
+  possible.
 - **[build-guide.md](build-guide.md)** - Hardware builds by budget ($50-$2000)
 - **[trailer-build.md](trailer-build.md)** - Real-world trailer dew collector with results
 - **[atmospheric-seed-theory.md](atmospheric-seed-theory.md)** - Research notes on seed expansion physics
