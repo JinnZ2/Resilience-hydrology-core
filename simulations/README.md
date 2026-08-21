@@ -184,3 +184,36 @@ Three results worth knowing:
   checkable.
 
 Details in the research log, Round 3.
+
+### 06_enso_response.py
+
+What a strong El Niño does to modelled dew yield, region by region, with the
+competing channels separated.
+
+```bash
+python 06_enso_response.py --all-regions --decompose
+python 06_enso_response.py --region southern_africa --samples 4000
+python 06_enso_response.py --list-regions
+```
+
+**Output**: yield change per region, and a decomposition into drying, clearing
+and warming.
+
+El Niño drought does two opposite things to radiative dew — it dries the air
+(less vapour to condense) and clears the sky (stronger radiative cooling). This
+is the first question in the project that *required* the energy balance:
+`01_basic_dew.py` has no cloud term at all, so to it a drought is just a smaller
+RH number.
+
+Result: **drying wins by 1.5–2x in every drought region tested.** Modelled yield
+falls 68–85% across Australia, southern Africa, South-East Asia and Central
+America, and rises 61% in the southern US, which a strong El Niño makes wetter.
+Clearing is a real benefit, just an outmatched one.
+
+The uncomfortable conclusion is in the research log as H11: this system produces
+least exactly where and when it is most needed.
+
+⚠️ The perturbation magnitudes are `[ASSUMED]` — only their signs are sourced
+(see [`../docs/enso-context.md`](../docs/enso-context.md), which also records why
+the primary NOAA sources could not be retrieved). Read the sign and the ranking,
+not the absolute mL.

@@ -550,6 +550,84 @@ the audit as much as about the thing audited. → **O14**
 
 ---
 
+## Round 5 — 2026-08-21: ENSO
+
+A very strong El Nino is forecast to peak between October 2026 and January 2027,
+with a ~69% chance of exceeding every event since 1950. Sources, and the limits
+of their chain of custody, are in [`enso-context.md`](enso-context.md).
+
+This is the first question this project has had that *required* the
+energy-balance model. `01_basic_dew.py` has no cloud term, so it cannot represent
+El Nino at all: to it, a drought is just a lower RH number.
+
+### H11 — "drought is when a dew collector earns its keep"
+
+The implicit claim behind the whole project, never stated as a hypothesis and
+therefore never tested.
+
+- **Source**: [`../README.md`](../README.md) framing ("During drought,
+  conventional irrigation fails... this approach"), and
+  [`build-guide.md`](build-guide.md) title, from 2025-12-07 onward.
+- **Prediction**: conditions that define El Nino drought make dew formation
+  easier, or at worst leave it unchanged. Drought skies are clear, and clear
+  skies are what radiative cooling needs.
+- **Run**: `python simulations/06_enso_response.py --all-regions --decompose`
+- **Result**: modelled dew yield per m², neutral vs strong El Nino:
+
+  | Region | Neutral | El Nino | Change | Productive nights |
+  |---|---|---|---|---|
+  | Australia | 8.0 | 1.2 | **−85%** | 13% → 3% |
+  | Southern Africa | 8.0 | 1.7 | **−78%** | 13% → 4% |
+  | Central America | 8.0 | 1.8 | **−77%** | 13% → 4% |
+  | SE Asia | 8.0 | 2.6 | **−68%** | 13% → 6% |
+  | Southern US (wetter phase) | 8.0 | 12.9 | **+61%** | 13% → 18% |
+
+  Channel decomposition, mL/night:
+
+  | Region | Drying | Clearing | Warming | Sum | Combined |
+  |---|---|---|---|---|---|
+  | Australia | −7.1 | +4.3 | −1.5 | −4.3 | −6.8 |
+  | Southern Africa | −6.6 | +3.7 | −1.5 | −4.4 | −6.3 |
+  | SE Asia | −6.3 | +4.3 | −1.0 | −3.0 | −5.4 |
+  | Central America | −6.6 | +3.3 | −1.0 | −4.3 | −6.2 |
+  | Southern US | +15.3 | −5.0 | +0.5 | +10.8 | +4.9 |
+
+- **Verdict**: **FALSIFIED.** The prediction was half right and the half that
+  was wrong is the one that matters. Clearing *is* a real, substantial benefit —
+  +3.3 to +4.3 mL/night, which is not a rounding error. It is simply outweighed
+  by drying, roughly 1.5–2x, in every drought region tested. **The system
+  produces least exactly where and when it is most needed.**
+- **Interaction**: combined is consistently worse than the naive sum in the
+  drought regions (−6.8 vs −4.3 for Australia) and better than it in the wet one
+  (+4.9 vs +10.8). Both directions have the same cause: the condensation term is
+  nonlinear and gated by the dew point. A night that no longer reaches the dew
+  point cannot be rescued by a clearer sky, and a night already condensing
+  freely gains less from more vapour.
+- **Revised claim**: the framing "water during drought" is not supported for
+  ENSO-driven drought. What the model supports is narrower and still useful:
+  supplementary water in humid-but-water-insecure conditions, and in regions on
+  the *wet* side of a strong El Nino. The README and build guide state the
+  seasonal-timing rule already (Round 3); this extends it from months to years.
+- **Not evidence**: perturbation magnitudes are [ASSUMED]. The signs are sourced
+  from the documented teleconnection; the sizes are invented. The finding rests
+  on the *ratio* of drying to clearing, which is more robust than either
+  magnitude, but is not independent of them. → **O15**
+
+### Deliberately not used as evidence
+
+Published work finds El Nino **intensifies** fog in the Namib (Li et al. 2025)
+and raises fog-water yield in the Atacama, while coastal California sees *less*
+fog. Those describe advection fog, driven by sea-surface temperature. This model
+describes radiative dew. Different mechanism, and the fog literature does not
+even agree with itself on sign across sites.
+
+Importing the Namib result as support for a dew claim would be M-01 repeating —
+a number detached from the model that produced it. Cited as context in
+`enso-context.md`, excluded from the evidence here. That two fog sites disagree
+about the sign is a reason to measure, not to borrow.
+
+---
+
 ## Open questions
 
 Carried forward. Each names what would close it.
@@ -626,6 +704,21 @@ Carried forward. Each names what would close it.
   lever and acts entirely through this function, the shape of this curve is
   carrying more weight than any other assumption here. Measurable directly:
   weigh a plate before and after a dew night, compare against what drained.
+- **O15 — ENSO perturbation magnitudes are invented.** `06_enso_response.py`
+  moves RH, cloud cover and temperature by amounts this project chose, because
+  per-region pre-dawn anomalies for a strong El Nino could not be retrieved
+  (see `enso-context.md`, Provenance — the primary NOAA and IRI sources were
+  unreachable from this environment). H11's conclusion depends on drying
+  outweighing clearing by 1.5–2x; that ratio would survive moderate errors in
+  either magnitude but has not been tested against real anomaly data. Closing it
+  needs observed composite RH and cloud anomalies for a strong El Nino in at
+  least one drought region.
+- **O16 — Does the anti-correlation hold outside ENSO?** H11 shows supply and
+  need moving in opposite directions for ENSO-driven drought. Whether that
+  generalises to drought driven by other mechanisms — a failed monsoon, a
+  blocking high, long-term aridification — is unknown and matters more than the
+  ENSO case, because it decides whether the project's premise is wrong in
+  general or only for this one driver.
 - **O14 — The audit only checks form, not truth.** `tools/log_audit.py` verifies
   that an entry cites a command and that the command exits zero. It does not
   check that the command produces the numbers the entry claims. An entry could

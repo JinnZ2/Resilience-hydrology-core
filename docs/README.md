@@ -6,6 +6,8 @@
 - **[research-log.md](research-log.md)** - Second falsification record, covering
   rounds 2-3: constrained variable search, transition analysis, and the first
   model-vs-measurement comparison
+- **[enso-context.md](enso-context.md)** - What El Niño does to dew yield, and
+  why the drought premise needs qualifying. Time-sensitive; re-check the state.
 - **[build-guide.md](build-guide.md)** - Hardware builds by budget ($50-$2000)
 - **[trailer-build.md](trailer-build.md)** - Real-world trailer dew collector with results
 - **[atmospheric-seed-theory.md](atmospheric-seed-theory.md)** - Research notes on seed expansion physics

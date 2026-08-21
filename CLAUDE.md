@@ -4,8 +4,13 @@ Physics-based atmospheric water harvesting using natural environmental gradients
 
 ## Project Overview
 
-This system amplifies natural dew/fog formation to collect water during drought.
-It uses temperature, pH, and light gradients — no pumps, no wells, no infrastructure.
+This system amplifies natural dew/fog formation to collect water. It uses
+temperature, pH, and light gradients — no pumps, no wells, no infrastructure.
+
+It was framed as drought mitigation. That framing is falsified for ENSO-driven
+drought (research-log H11): dew needs humid air, El Nino droughts are dry-air
+droughts, and modelled yield falls 68-85% in the regions most at risk. Supply and
+need move in opposite directions. Qualify accordingly.
 
 Modelled output (`simulations/01_basic_dew.py`): 0.054-0.100 mm/day unamplified,
 0.162-0.300 mm/day with the assumed 3x gain. Unvalidated against field data.
@@ -25,12 +30,15 @@ simulations/          Python models (numpy/matplotlib/scipy)
                            ranges, ecological levers, measurement priorities
   05_transition_paths.py   Cheapest ordered changes from a deployed build to a
                            better one, scored under our own uncertainty
+  06_enso_response.py      Dew yield under a strong El Nino, by region, with the
+                           drying-vs-clearing channels separated
 firmware/             MicroPython code for ESP32 hardware nodes
   esp32_basic/          Basic temperature logger (DS18B20 sensors)
 docs/                 Documentation, build guides, research notes
   method-log.md         Claims, tests, falsifications, open unknowns (read first)
-  research-log.md       Second falsification record; rounds 2-3 continue past
+  research-log.md       Second falsification record; rounds 2-5 continue past
                         the method log (H-nn entries, O-nn open questions)
+  enso-context.md       ENSO state, sources, and the drought-premise problem
   build-guide.md        Hardware builds by budget ($50-$2000)
   trailer-build.md      Real-world trailer dew collector results
   atmospheric-seed-theory.md  Research notes on seed expansion physics
@@ -53,7 +61,7 @@ legacy/               Superseded files, frozen — the precedence record
 
 - Python files use snake_case for functions, variables, and file names
 - Classes use PascalCase
-- Simulation files are numbered: `01_`, `02_`, `03_`
+- Simulation files are numbered: `01_` through `06_`
 - Units: mm/day for water output, Kelvin for temperatures in code, Celsius in display
 - Climate presets: arid, semi_arid, mediterranean, tropical_dry
 
@@ -99,10 +107,11 @@ python simulations/02_crop_response.py --water 0.27
 python simulations/03_seed_optimization.py   # reports its own degeneracy (M-03)
 python simulations/04_variable_search.py --condensing-only
 python simulations/05_transition_paths.py
+python simulations/06_enso_response.py --all-regions --decompose
 
 Numbered filenames start with a digit, so they cannot be imported normally.
-`05_transition_paths.py` loads `04_variable_search.py` via importlib; follow that
-pattern if another file needs to reuse a model.
+`05_transition_paths.py` and `06_enso_response.py` load `04_variable_search.py`
+via importlib; follow that pattern if another file needs to reuse a model.
 ```
 
 ## Key Classes
@@ -119,6 +128,8 @@ pattern if another file needs to reuse a model.
   place where variable bounds, kinds, and measurement status are declared.
 - `TransitionEvaluator` / `Modification` — Retrofit scoring under weather and
   coefficient uncertainty (simulations/05_transition_paths.py)
+- `EnsoComparison` — Paired-quantile dew comparison across ENSO states
+  (simulations/06_enso_response.py)
 - `TemperatureLogger` — ESP32 sensor logger (firmware/esp32_basic/main.py)
 - `ValidationLogger` — Surface temp + humidity + volume logger
   (firmware/esp32_validation/main.py)
@@ -133,6 +144,10 @@ pattern if another file needs to reuse a model.
   budget it delivers ~6% of the radiative cooling the surface already does for
   free — worth ~1.11x against a claimed 3x (research-log H8). Removing it
   recovers $15 and funds the changes that do work.
+- **The drought premise is falsified for ENSO drought (H11).** Dew needs humid
+  air; El Nino droughts are dry-air droughts. Modelled yield falls 68-85% in the
+  regions a strong El Nino puts at risk. Do not describe this system as drought
+  mitigation without that qualification.
 - Build order matters more than the parts: season, then siting, then tilt. Each
   hardware change is near-worthless before those and large after them (Round 3).
 - Pin map: GPIO4 ground sensor, GPIO5 air sensor, GPIO15 SD chip-select.

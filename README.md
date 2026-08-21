@@ -13,6 +13,15 @@ People and crops suffer.
 Instead of pumping or transporting water, amplify the natural process of dew
 formation using temperature, pH, and light gradients that exist everywhere.
 
+> **The premise has a problem, found 2026-08-21.** Dew needs humid air. The
+> droughts this project was aimed at are dry-air droughts, and the model says
+> yield falls 68–85% in exactly the regions a strong El Niño puts at risk —
+> Australia, southern Africa, South-East Asia, Central America. Clearer drought
+> skies do help radiative cooling, substantially, but drying outweighs clearing
+> by 1.5–2x. **Supply and need move in opposite directions.**
+> See [`docs/research-log.md`](docs/research-log.md) H11 and
+> [`docs/enso-context.md`](docs/enso-context.md).
+
 ## Where this actually stands
 
 Read this before quoting any number from this repository.
@@ -26,6 +35,7 @@ Read this before quoting any number from this repository.
 | Seed optimisation | **Degenerate.** Objective does not select a seed |
 | Energy-balance model | Added round 2; structurally sound, still unvalidated |
 | Transition analysis | First stage costs −$3 and works today |
+| Drought premise | **Falsified for ENSO drought** (H11) — see above |
 
 Modelled output, `simulations/01_basic_dew.py`:
 
@@ -86,7 +96,7 @@ being right about numbers we invented.
 ```
 simulations/       Python models (numpy/matplotlib/scipy)
   01-03            original models, with their known defects documented
-  04, 05           energy-balance search and transition analysis
+  04, 05, 06       energy-balance search, transition analysis, ENSO response
 firmware/          MicroPython for ESP32 sensor nodes
   esp32_basic/     temperature only
   esp32_validation/ adds surface temp, humidity, volume — use this one
@@ -104,6 +114,7 @@ python simulations/02_crop_response.py --water 0.27
 python simulations/03_seed_optimization.py
 python simulations/04_variable_search.py --condensing-only
 python simulations/05_transition_paths.py
+python simulations/06_enso_response.py --all-regions --decompose
 ```
 
 See [`simulations/README.md`](simulations/README.md) for what each model does and
@@ -142,7 +153,7 @@ list what you didn't know → rerun.
 Falsified claims are kept, not deleted. There are two records:
 [`docs/method-log.md`](docs/method-log.md) (M-nn) came first and holds
 precedence, and [`docs/research-log.md`](docs/research-log.md) (H-nn, O-nn)
-continues into rounds 2–3. They were written independently and reached the same
+continues into rounds 2–5. They were written independently and reached the same
 round-1 findings by different routes — an accidental replication, kept as one.
 Between them they record: every claim, what happened when it was tested, what it was changed to,
 and what that revealed we didn't know. Superseded files go to `legacy/` frozen,
