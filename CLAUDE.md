@@ -171,3 +171,17 @@ via importlib; follow that pattern if another file needs to reuse a model.
 - Pin map: GPIO4 ground sensor, GPIO5 air sensor, GPIO15 SD chip-select.
   GPIO15 was moved off GPIO5 to resolve a collision with the air sensor (M-06);
   the fix is unverified on hardware.
+
+<!-- clone-refspec-note v1 -->
+## Cloning and pushing
+Shallow clones are single-branch by default.
+Before pushing any branch other than main, run:
+
+    git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+    git fetch --depth 1
+
+Or clone with: git clone --depth 1 --no-single-branch <url>
+Without this, the first push of a new branch
+fails the tracking-ref check even when the
+commit landed.
+<!-- /clone-refspec-note v1 -->
